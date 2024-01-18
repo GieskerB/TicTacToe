@@ -1,6 +1,6 @@
 package test.java.de.gieskerb.tictactoe.model;
 
-import main.java.de.gieskerb.tictactoe.Exceptions.*;
+import main.java.de.gieskerb.tictactoe.exceptions.*;
 import main.java.de.gieskerb.tictactoe.model.Board;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,7 +13,6 @@ class BoardTest {
 
     @BeforeEach
     void setUp() {
-        // Hier wird vor jedem Test eine neue Instanz von Board erstellt
         board = new Board();
     }
 
