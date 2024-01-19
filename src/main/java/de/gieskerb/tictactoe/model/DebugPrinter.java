@@ -25,15 +25,18 @@ public class DebugPrinter {
 
     /**
      * Prints the pattern to the console. Not simply in one line, but in multiple aligned like a 2D table.
+     *
      * @param patternString will be printed to console in a "good-looking" way
      */
     private void printBitMap(String patternString) {
+        StringBuilder output = new StringBuilder((this.boardPointer.size + 1) * this.boardPointer.size);
         for (byte i = (byte) (this.boardPointer.size * this.boardPointer.size - 1); i >= 0; i--) {
-            System.out.print(patternString.charAt(i));
+            output.append(patternString.charAt(i));
             if (i % this.boardPointer.size == 0) {
-                System.out.println();
+                output.append('\n');
             }
         }
+        System.out.print(output.toString() + '\n');
     }
 
     public DebugPrinter(Board corresponding) {
@@ -44,21 +47,17 @@ public class DebugPrinter {
         for (long pattern : boardPointer.bitMapPatterns) {
             String patternString = this.longToBinary(pattern);
             this.printBitMap(patternString);
-            System.out.println();
         }
-        System.out.println();
     }
 
     public void printBitMapP1() {
         String patternString = this.longToBinary(this.boardPointer.bitMapPlayer1);
         printBitMap(patternString);
-        System.out.println();
     }
 
     public void printBitMapP2() {
         String patternString = this.longToBinary(this.boardPointer.bitMapPlayer2);
         printBitMap(patternString);
-        System.out.println();
     }
 
 }

@@ -6,10 +6,10 @@ public class Human extends Player{
 
     private static byte unnamedPlayerCount = 0;
 
-    Human (boolean isPlayerOne) {
+    public Human(boolean isPlayerOne) {
         this("Player " + ++unnamedPlayerCount, isPlayerOne);
     }
-    Human(String name, boolean isPlayerOne) {
+    public Human(String name, boolean isPlayerOne) {
         super(name, isPlayerOne);
     }
 
