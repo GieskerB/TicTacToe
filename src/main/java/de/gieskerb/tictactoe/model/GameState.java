@@ -7,38 +7,19 @@ package main.java.de.gieskerb.tictactoe.model;
 public class GameState {
 
     /**
-     * number of rows and columns of the board.
+     * Values are copied straight from the board object
      */
-    final byte size;
+    public final byte size;
 
     /**
-     * Bitmaps contain information about the location where a player made a move.
-     * A one in the map says the player made a move in that location.
-     * Going from LSB to MSB in the bitmap, it will represent the game tile
-     * from the bottom right going from right to left and bottom to top.
+     * Values are copied straight from the board object
      */
-    long bitMapPlayer1,bitMapPlayer2;
+    public final long bitMapPlayer1,bitMapPlayer2;
 
-    public GameState(byte size) {
-        this.size = size;
-        this.bitMapPlayer1 = 0;
-        this.bitMapPlayer2 = 0;
-    }
-
-    /**
-     * Allowing for public access to the bitmap
-     * @return bitmap form player one
-     */
-    public long getBitMapPlayer1() {
-        return this.bitMapPlayer1;
-    }
-
-    /**
-     * Allowing for public access to the bitmap
-     * @return bitmap form player two
-     */
-    public long getBitMapPlayer2() {
-        return this.bitMapPlayer2;
+    GameState(Board board) {
+        this.size = board.size;
+        this.bitMapPlayer1 = board.getBitMapPlayer1();
+        this.bitMapPlayer2 = board.getBitMapPlayer2();
     }
 
     /*

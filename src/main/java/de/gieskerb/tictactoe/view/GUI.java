@@ -3,7 +3,9 @@ package main.java.de.gieskerb.tictactoe.view;
 import javax.swing.*;
 import java.awt.*;
 
-public class GUI extends JFrame {
+public class GUI extends Visual {
+
+    private JFrame window;
 
     public GUI (int pixelSize, int boardSize) {
 
@@ -21,13 +23,18 @@ public class GUI extends JFrame {
             System.err.println("Look and feel not set.");
         }
 
-        super.add(tmp);
-        super.pack();
-        super.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        super.setLocationRelativeTo(null);
-        super.setVisible(true);
+        this.window = new JFrame();
+        this.window.add(tmp);
+        this.window.pack();
+        this.window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.window.setLocationRelativeTo(null);
+        this.window.setVisible(true);
 
 
     }
 
+    @Override
+    public void update(Object obj) {
+
+    }
 }

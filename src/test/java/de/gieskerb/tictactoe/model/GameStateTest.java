@@ -25,12 +25,12 @@ class GameStateTest {
 
     @Test
     void testCorrectBitMapP1() {
-        assertEquals(0b101000000, this.gs.getBitMapPlayer1());
+        assertEquals(0b101000000, this.gs.bitMapPlayer1);
     }
 
     @Test
     void testCorrectBitMapP2() {
-        assertEquals(0b000010001, this.gs.getBitMapPlayer2());
+        assertEquals(0b000010001, this.gs.bitMapPlayer2);
     }
 
     @Test

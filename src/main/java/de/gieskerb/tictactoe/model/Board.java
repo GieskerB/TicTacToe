@@ -11,7 +11,20 @@ import main.java.de.gieskerb.tictactoe.exceptions.WrongBoardSizeException;
  * Win detection
  *
  */
-public class Board extends GameState {
+public class Board extends Updater {
+
+    /**
+     * number of rows and columns of the board.
+     */
+    final byte size;
+
+    /**
+     * Bitmaps contain information about the location where a player made a move.
+     * A one in the map says the player made a move in that location.
+     * Going from LSB to MSB in the bitmap, it will represent the game tile
+     * from the bottom right going from right to left and bottom to top.
+     */
+    private long bitMapPlayer1,bitMapPlayer2;
 
     /**
      * A list of bitmaps to compare to when checking for a win.
@@ -31,7 +44,7 @@ public class Board extends GameState {
     private boolean checkWin(boolean playerOne) {
         for (long bitMapPattern : this.bitMapPatterns) {
             // Bitmap #TODO
-            if ((bitMapPattern & (playerOne ? super.bitMapPlayer1 : super.bitMapPlayer2)) == bitMapPattern) {
+            if ((bitMapPattern & (playerOne ? this.bitMapPlayer1 : this.bitMapPlayer2)) == bitMapPattern) {
                 return true;
             }
         }
@@ -44,7 +57,23 @@ public class Board extends GameState {
     private boolean checkFull() {
         // Left side long has 'size * size' zeros.
         // Right side (if board is truly full) has 'size * size' ones. Plus one equals left.
-        return (1L << super.size * super.size) == ((super.bitMapPlayer1 | super.bitMapPlayer2) + 1);
+        return (1L << this.size * this.size) == ((this.bitMapPlayer1 | this.bitMapPlayer2) + 1);
+    }
+
+    /**
+     * Allowing for public access to the bitmap
+     * @return bitmap form player one
+     */
+    public long getBitMapPlayer1() {
+        return this.bitMapPlayer1;
+    }
+
+    /**
+     * Allowing for public access to the bitmap
+     * @return bitmap form player two
+     */
+    public long getBitMapPlayer2() {
+        return this.bitMapPlayer2;
     }
 
     /**
@@ -55,18 +84,23 @@ public class Board extends GameState {
         this(3);
     }
 
+    @Override
+    public void service() {
+
+    }
+
     /**
      * Creates a Board with a variable size from 2x2 to 8x8.
      * @param size Number of rows and columns.
      */
     public Board(int size) {
-        super((byte) size);
+        this.size = (byte) size;
         if (size < 2 || size > 8) {
             throw new WrongBoardSizeException("Size of TicTacToe-Board must be in range 2 to 8");
         }
         this.currentTurn = true;
-        // super.size rows + super.size columns + 2 diagonals
-        this.bitMapPatterns = new long[super.size * 2 + 2];
+        // this.size rows + this.size columns + 2 diagonals
+        this.bitMapPatterns = new long[this.size * 2 + 2];
         initPatterns();
     }
 
@@ -77,10 +111,10 @@ public class Board extends GameState {
      */
     private void initPatterns() {
         // Row-patterns:
-        long patternTemplate = (1L << super.size) - 1;
+        long patternTemplate = (1L << this.size) - 1;
         int index = 0;
-        for (int i = 0; i < super.size; i++) {
-            this.bitMapPatterns[index++] = patternTemplate << (i * super.size);
+        for (int i = 0; i < this.size; i++) {
+            this.bitMapPatterns[index++] = patternTemplate << (i * this.size);
         }
         // Column-patterns:
         patternTemplate = 1L;
@@ -88,23 +122,23 @@ public class Board extends GameState {
             patternTemplate <<= this.size;
             patternTemplate |= 1L;
         }
-        for (int i = 0; i < super.size; i++) {
+        for (int i = 0; i < this.size; i++) {
             this.bitMapPatterns[index++] = patternTemplate << i;
         }
         // Diagonal-patterns TL-BR
         patternTemplate = 1L;
-        for (int i = 0; i < super.size - 1; i++) {
-            patternTemplate <<= super.size + 1;
+        for (int i = 0; i < this.size - 1; i++) {
+            patternTemplate <<= this.size + 1;
             patternTemplate |= 1L;
         }
         this.bitMapPatterns[index++] = patternTemplate;
         // Diagonal-patterns BL-TR
         patternTemplate = 1L;
-        for (int i = 0; i < super.size - 1; i++) {
-            patternTemplate <<= super.size - 1;
+        for (int i = 0; i < this.size - 1; i++) {
+            patternTemplate <<= this.size - 1;
             patternTemplate |= 1L;
         }
-        patternTemplate <<= super.size - 1;
+        patternTemplate <<= this.size - 1;
         this.bitMapPatterns[index] = patternTemplate;
 
     }
@@ -113,7 +147,7 @@ public class Board extends GameState {
      * Self-Explanatory: Reducing this Object to its Parent class. The GameState
      */
     public GameState exportGameState() {
-        return this;
+        return new GameState(this);
     }
 
     /**
@@ -131,11 +165,11 @@ public class Board extends GameState {
      *             +-+-+-+
      */
     public void makeMove(int tile) {
-        final byte sizeSquared = (byte) (super.size * super.size);
+        final byte sizeSquared = (byte) (this.size * this.size);
         // Throwing an exception if move is invalid.
         if (tile < 0 || tile >= sizeSquared) {
             throw new OutOfBounceException(tile + " is not in bound for a board of size "
-                    + super.size + ". Argument must be in range 0 - " + (sizeSquared - 1) + ".");
+                    + this.size + ". Argument must be in range 0 - " + (sizeSquared - 1) + ".");
         }
         // game over = no moves to make
         if(this.isGameOver()) {
@@ -145,7 +179,7 @@ public class Board extends GameState {
         // Creating a bitmap with only one bit flipped to 1 at the index where the player wants to make a move.
         final long placeMoveBitmap = 1L << ((sizeSquared - 1) - tile);
         // Logical disjunction of both player bitmaps creates a bitmap of all non-empty tiles.
-        final long bitMapOccupied = super.bitMapPlayer1 | super.bitMapPlayer2;
+        final long bitMapOccupied = this.bitMapPlayer1 | this.bitMapPlayer2;
 
         // Throwing an exception if move is invalid.
         if ((placeMoveBitmap & bitMapOccupied) != 0) {
@@ -154,9 +188,9 @@ public class Board extends GameState {
 
         // Making the move by logical disjunction with correct bitmap
         if (this.currentTurn) {
-            super.bitMapPlayer1 |= placeMoveBitmap;
+            this.bitMapPlayer1 |= placeMoveBitmap;
         } else {
-            super.bitMapPlayer2 |= placeMoveBitmap;
+            this.bitMapPlayer2 |= placeMoveBitmap;
         }
 
         this.currentTurn = !this.currentTurn;
@@ -178,11 +212,11 @@ public class Board extends GameState {
      *            +---+---+---+
      */
     public void makeMove(int row, int col) {
-        if (row < 0 || row >= super.size || col < 0 || col >= super.size) {
+        if (row < 0 || row >= this.size || col < 0 || col >= this.size) {
             throw new OutOfBounceException("Row: "+row + "or Column: " + col +" is not in bound for a board of size "
-                    + super.size + ". Argument must be in range 0 - " + (super.size - 1) + ".");
+                    + this.size + ". Argument must be in range 0 - " + (this.size - 1) + ".");
         }
-        this.makeMove(row * super.size + col);
+        this.makeMove(row * this.size + col);
 
     }
 

@@ -51,12 +51,12 @@ public class DebugPrinter {
     }
 
     public void printBitMapP1() {
-        String patternString = this.longToBinary(this.boardPointer.bitMapPlayer1);
+        String patternString = this.longToBinary(this.boardPointer.getBitMapPlayer1());
         printBitMap(patternString);
     }
 
     public void printBitMapP2() {
-        String patternString = this.longToBinary(this.boardPointer.bitMapPlayer2);
+        String patternString = this.longToBinary(this.boardPointer.getBitMapPlayer2());
         printBitMap(patternString);
     }
 
