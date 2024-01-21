@@ -8,7 +8,7 @@ public abstract class Updater {
 
     private final List<Updatable> updatableList;
 
-    Updater() {
+    protected Updater() {
         this.updatableList = new ArrayList<Updatable>();
     }
 
@@ -28,9 +28,9 @@ public abstract class Updater {
         this.updatableList.remove(updatable);
     }
 
-    final void fireUpdate(Object obj) {
-        for(var notifyable: this.updatableList) {
-            notifyable.update(obj);
+    public final void fireUpdate(Object obj) {
+        for(var notifiable: this.updatableList) {
+            notifiable.update(obj);
         }
     }
 
