@@ -43,7 +43,7 @@ public class Board extends Updater {
      */
     private boolean checkWin(boolean playerOne) {
         for (long bitMapPattern : this.bitMapPatterns) {
-            // Bitmap #TODO
+            // Logical conjunction between bitMapPattern for a win and the bitmap of the current player
             if ((bitMapPattern & (playerOne ? this.bitMapPlayer1 : this.bitMapPlayer2)) == bitMapPattern) {
                 return true;
             }
@@ -52,62 +52,10 @@ public class Board extends Updater {
     }
 
     /**
-     * @return Is every tile on the board filled?
-     */
-    private boolean checkFull() {
-        // Left side long has 'size * size' zeros.
-        // Right side (if board is truly full) has 'size * size' ones. Plus one equals left.
-        return (1L << this.size * this.size) == ((this.bitMapPlayer1 | this.bitMapPlayer2) + 1);
-    }
-
-    /**
-     * Allowing for public access to the bitmap
-     * @return bitmap form player one
-     */
-    public long getBitMapPlayer1() {
-        return this.bitMapPlayer1;
-    }
-
-    /**
-     * Allowing for public access to the bitmap
-     * @return bitmap form player two
-     */
-    public long getBitMapPlayer2() {
-        return this.bitMapPlayer2;
-    }
-
-    /**
-     * Creates a Board with a default size of 3x3.
-     */
-    public Board() {
-        //Default size for a tic tac toe game
-        this(3);
-    }
-
-    @Override
-    public void service() {
-
-    }
-
-    /**
-     * Creates a Board with a variable size from 2x2 to 8x8.
-     * @param size Number of rows and columns.
-     */
-    public Board(int size) {
-        this.size = (byte) size;
-        if (size < 2 || size > 8) {
-            throw new WrongBoardSizeException("Size of TicTacToe-Board must be in range 2 to 8");
-        }
-        this.currentTurn = true;
-        // this.size rows + this.size columns + 2 diagonals
-        this.bitMapPatterns = new long[this.size * 2 + 2];
-        initPatterns();
-    }
-
-    /**
      * Creates all patterns to later check for a win.
      * A pattern is a bitmap that represents each row, column and diagonal.
-     * #TODO -> logical conjunction
+     * When logically continuing what pattern and a players bitmap and result
+     * os the same pattern again, player has won the game.
      */
     private void initPatterns() {
         // Row-patterns:
@@ -143,6 +91,61 @@ public class Board extends Updater {
 
     }
 
+
+    /**
+     * @return Is every tile on the board filled?
+     */
+    private boolean checkFull() {
+        // Left side long has 'size * size' zeros.
+        // Right side (if board is truly full) has 'size * size' ones. Plus one equals left.
+        return (1L << this.size * this.size) == ((this.bitMapPlayer1 | this.bitMapPlayer2) + 1);
+    }
+
+    /**
+     * Creates a Board with a default size of 3x3.
+     */
+    public Board() {
+        //Default size for a tic tac toe game
+        this(3);
+    }
+
+    /**
+     * Creates a Board with a variable size from 2x2 to 8x8.
+     * @param size Number of rows and columns.
+     */
+    public Board(int size) {
+        this.size = (byte) size;
+        if (size < 2 || size > 8) {
+            throw new WrongBoardSizeException("Size of TicTacToe-Board must be in range 2 to 8");
+        }
+        this.currentTurn = true;
+        // this.size rows + this.size columns + 2 diagonals
+        this.bitMapPatterns = new long[this.size * 2 + 2];
+        initPatterns();
+    }
+
+    /**
+     * Allowing for public access to the bitmap
+     * @return bitmap form player one
+     */
+    public long getBitMapPlayer1() {
+        return this.bitMapPlayer1;
+    }
+
+    /**
+     * Allowing for public access to the bitmap
+     * @return bitmap form player two
+     */
+    public long getBitMapPlayer2() {
+        return this.bitMapPlayer2;
+    }
+
+
+    @Override
+    public void service(int input1, int input2) {
+
+    }
+
     /**
      * Self-Explanatory: Reducing this Object to its Parent class. The GameState
      */
@@ -164,7 +167,8 @@ public class Board extends Updater {
      *             |6|7|8|
      *             +-+-+-+
      */
-    public void makeMove(int tile) {
+
+    private void makeMove(int tile) {
         final byte sizeSquared = (byte) (this.size * this.size);
         // Throwing an exception if move is invalid.
         if (tile < 0 || tile >= sizeSquared) {
@@ -183,7 +187,7 @@ public class Board extends Updater {
 
         // Throwing an exception if move is invalid.
         if ((placeMoveBitmap & bitMapOccupied) != 0) {
-            throw new NonEmptyTileException("The chosen tile is already occupied. You hit an non empty Tile");
+            throw new NonEmptyTileException("The chosen tile is already occupied. You hit an non empty tile");
         }
 
         // Making the move by logical disjunction with correct bitmap
@@ -196,7 +200,6 @@ public class Board extends Updater {
         this.currentTurn = !this.currentTurn;
 
     }
-    // #TODO
     /**
      * Tries to make a move on the board. Illegal placements like out of bounce and already occupies
      * * will throw an exception.
@@ -211,7 +214,7 @@ public class Board extends Updater {
      *            |2,0|2,1|2,2|
      *            +---+---+---+
      */
-    public void makeMove(int row, int col) {
+    private void makeMove(int row, int col) {
         if (row < 0 || row >= this.size || col < 0 || col >= this.size) {
             throw new OutOfBounceException("Row: "+row + "or Column: " + col +" is not in bound for a board of size "
                     + this.size + ". Argument must be in range 0 - " + (this.size - 1) + ".");

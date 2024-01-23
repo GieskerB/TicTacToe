@@ -18,7 +18,7 @@ class UpdaterTest {
     void setUP() {
         this.updater = new Updater() {
             @Override
-            public void service() {
+            public void service(int input1, int input2) {
                 editableCounter += 1;
             }
         };
@@ -81,7 +81,7 @@ class UpdaterTest {
 
     @Test
     void testService() {
-        this.updater.service();
+        this.updater.service((byte) 0, (byte) 0);
         assertEquals(this.editableCounter,100);
     }
 
