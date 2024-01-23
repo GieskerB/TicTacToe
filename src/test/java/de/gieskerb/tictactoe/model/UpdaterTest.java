@@ -1,5 +1,6 @@
 package test.java.de.gieskerb.tictactoe.model;
 
+import main.java.de.gieskerb.tictactoe.model.Origin;
 import main.java.de.gieskerb.tictactoe.model.Updatable;
 import main.java.de.gieskerb.tictactoe.model.Updater;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,8 +19,8 @@ class UpdaterTest {
     void setUP() {
         this.updater = new Updater() {
             @Override
-            public void service(int input1, int input2) {
-                editableCounter += 1;
+            public void service(int[] args, Origin origin) {
+                editableCounter += 100;
             }
         };
 
@@ -28,7 +29,7 @@ class UpdaterTest {
             this.updatables[i] = new Updatable() {
                 @Override
                 public void update(Object obj) {
-                    editableCounter += 100;
+                    editableCounter += 1;
                 }
             };
         }
@@ -81,7 +82,7 @@ class UpdaterTest {
 
     @Test
     void testService() {
-        this.updater.service((byte) 0, (byte) 0);
+        this.updater.service(new int[0], Origin.CONTROLLER);
         assertEquals(this.editableCounter,100);
     }
 

@@ -2,6 +2,7 @@ package test.java.de.gieskerb.tictactoe.model;
 
 import main.java.de.gieskerb.tictactoe.model.Board;
 import main.java.de.gieskerb.tictactoe.model.GameState;
+import main.java.de.gieskerb.tictactoe.model.Origin;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -16,10 +17,10 @@ class GameStateTest {
     void setUp() {
         // Board is subclass of GameState. Need this class to edit the GameState correctly
         Board board = new Board();
-        board.makeMove(2);
-        board.makeMove(4);
-        board.makeMove(0);
-        board.makeMove(8);
+        board.service(new int[] {2}, Origin.CONTROLLER);
+        board.service(new int[] {4}, Origin.CONTROLLER);
+        board.service(new int[] {0}, Origin.CONTROLLER);
+        board.service(new int[] {8}, Origin.CONTROLLER);
         this.gs = board.exportGameState();
     }
 

@@ -2,6 +2,7 @@ package test.java.de.gieskerb.tictactoe.model;
 
 import main.java.de.gieskerb.tictactoe.model.Board;
 import main.java.de.gieskerb.tictactoe.model.DebugPrinter;
+import main.java.de.gieskerb.tictactoe.model.Origin;
 import org.junit.jupiter.api.*;
 
 import java.io.ByteArrayOutputStream;
@@ -24,9 +25,9 @@ class DebugPrinterTest {
     @BeforeEach
     void setUp() {
         Board board = new Board(2);
-        board.makeMove(1);
-        board.makeMove(0);
-        board.makeMove(2);
+        board.service(new int[]{1}, Origin.CONTROLLER);
+        board.service(new int[]{0}, Origin.CONTROLLER);
+        board.service(new int[]{2}, Origin.CONTROLLER);
         dp = new DebugPrinter(board);
     }
 

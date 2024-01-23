@@ -2,6 +2,7 @@ package main.java.de.gieskerb.tictactoe.model;
 
 import main.java.de.gieskerb.tictactoe.exceptions.NonEmptyTileException;
 import main.java.de.gieskerb.tictactoe.exceptions.OutOfBounceException;
+import main.java.de.gieskerb.tictactoe.exceptions.WrongArgSizeException;
 import main.java.de.gieskerb.tictactoe.exceptions.WrongBoardSizeException;
 
 /**
@@ -9,7 +10,6 @@ import main.java.de.gieskerb.tictactoe.exceptions.WrongBoardSizeException;
  * Making a move.
  * Checking for correctness.
  * Win detection
- *
  */
 public class Board extends Updater {
 
@@ -24,7 +24,7 @@ public class Board extends Updater {
      * Going from LSB to MSB in the bitmap, it will represent the game tile
      * from the bottom right going from right to left and bottom to top.
      */
-    private long bitMapPlayer1,bitMapPlayer2;
+    private long bitMapPlayer1, bitMapPlayer2;
 
     /**
      * A list of bitmaps to compare to when checking for a win.
@@ -38,6 +38,7 @@ public class Board extends Updater {
 
     /**
      * Checking for a win by comparing each row, column and diagonal with the winning patterns generated earlier.
+     *
      * @param playerOne Determine which bitMap needs to be checked for a win.
      * @return Did the given player win?
      */
@@ -111,6 +112,7 @@ public class Board extends Updater {
 
     /**
      * Creates a Board with a variable size from 2x2 to 8x8.
+     *
      * @param size Number of rows and columns.
      */
     public Board(int size) {
@@ -126,6 +128,7 @@ public class Board extends Updater {
 
     /**
      * Allowing for public access to the bitmap
+     *
      * @return bitmap form player one
      */
     public long getBitMapPlayer1() {
@@ -134,20 +137,38 @@ public class Board extends Updater {
 
     /**
      * Allowing for public access to the bitmap
+     *
      * @return bitmap form player two
      */
     public long getBitMapPlayer2() {
         return this.bitMapPlayer2;
     }
 
+    /**
+     * Everything need to be done after a players move to perpare for the next one.
+     * 1. Change which player is currently playing
+     */
+    private void afterMove() {
+        this.currentTurn = !this.currentTurn;
+    }
 
     @Override
-    public void service(int input1, int input2) {
+    public void service(int[] args, Origin origin) {
+        final int ARG_SIZE = args.length;
+        switch (origin) {
+            case CONTROLLER:
+                if (ARG_SIZE != 1 && ARG_SIZE != 2) {
+                    throw new WrongArgSizeException("The expected number of args from a controller is one or two.");
+                }
+                if (args.length == 1) this.makeMove(args[0]);
+                else this.makeMove(args[0], args[1]);
+                this.afterMove();
 
+        }
     }
 
     /**
-     * Self-Explanatory: Reducing this Object to its Parent class. The GameState
+     * Self-Explanatory: Reducing this object to a GameState
      */
     public GameState exportGameState() {
         return new GameState(this);
@@ -167,7 +188,6 @@ public class Board extends Updater {
      *             |6|7|8|
      *             +-+-+-+
      */
-
     private void makeMove(int tile) {
         final byte sizeSquared = (byte) (this.size * this.size);
         // Throwing an exception if move is invalid.
@@ -176,7 +196,7 @@ public class Board extends Updater {
                     + this.size + ". Argument must be in range 0 - " + (sizeSquared - 1) + ".");
         }
         // game over = no moves to make
-        if(this.isGameOver()) {
+        if (this.isGameOver()) {
             return;
         }
 
@@ -196,10 +216,8 @@ public class Board extends Updater {
         } else {
             this.bitMapPlayer2 |= placeMoveBitmap;
         }
-
-        this.currentTurn = !this.currentTurn;
-
     }
+
     /**
      * Tries to make a move on the board. Illegal placements like out of bounce and already occupies
      * * will throw an exception.
@@ -216,7 +234,7 @@ public class Board extends Updater {
      */
     private void makeMove(int row, int col) {
         if (row < 0 || row >= this.size || col < 0 || col >= this.size) {
-            throw new OutOfBounceException("Row: "+row + "or Column: " + col +" is not in bound for a board of size "
+            throw new OutOfBounceException("Row: " + row + "or Column: " + col + " is not in bound for a board of size "
                     + this.size + ". Argument must be in range 0 - " + (this.size - 1) + ".");
         }
         this.makeMove(row * this.size + col);
@@ -225,9 +243,10 @@ public class Board extends Updater {
 
     /**
      * There are three reasons why the game ends:
-     *      1. Player 1 has won the game.
-     *      2. Player 2 has won the game.
-     *      3. No one has won the game. Its draw.
+     * 1. Player 1 has won the game.
+     * 2. Player 2 has won the game.
+     * 3. No one has won the game. Its draw.
+     *
      * @return is the game over due to one of the prior reasons.
      */
     public boolean isGameOver() {

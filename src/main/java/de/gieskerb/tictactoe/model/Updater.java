@@ -34,7 +34,7 @@ public abstract class Updater {
         }
     }
 
-    public abstract void service(int input1, int input2);
+    public abstract void service(int[] args, Origin origin);
 
 
 }

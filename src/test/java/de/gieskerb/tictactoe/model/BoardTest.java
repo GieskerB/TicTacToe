@@ -2,6 +2,7 @@ package test.java.de.gieskerb.tictactoe.model;
 
 import main.java.de.gieskerb.tictactoe.exceptions.*;
 import main.java.de.gieskerb.tictactoe.model.Board;
+import main.java.de.gieskerb.tictactoe.model.Origin;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -18,69 +19,62 @@ class BoardTest {
     }
 
     @Test
-    @Disabled("makeMove is private now")
-    void testMakeMoveWithTile() {
-        //board.makeMove(4);
+    void testServiceWithTile() {
+        board.service(new int[]{4}, Origin.CONTROLLER);
         assertFalse(board.isGameOver());
         assertEquals(0b000010000, board.getBitMapPlayer1());
     }
 
     @Test
-    @Disabled("makeMove is private now")
-    void testMakeMoveWithRowAndCol() {
-        //board.makeMove(1, 1);
+    void testServiceWithRowAndCol() {
+        board.service(new int[]{1, 1}, Origin.CONTROLLER);
         assertFalse(board.isGameOver());
         assertEquals(0b000010000, board.getBitMapPlayer1());
     }
 
     @Test
-    @Disabled("makeMove is private now")
-    void testMakeMoveOutOfBounce() {
-        //assertThrows(OutOfBounceException.class, () -> board.makeMove(-1));
-        //assertThrows(OutOfBounceException.class, () -> board.makeMove(9));
-        //assertThrows(OutOfBounceException.class, () -> board.makeMove(10, 2));
+    void testServiceOutOfBounce() {
+        assertThrows(OutOfBounceException.class, () -> board.service(new int[]{-1}, Origin.CONTROLLER));
+        assertThrows(OutOfBounceException.class, () -> board.service(new int[]{9}, Origin.CONTROLLER));
+        assertThrows(OutOfBounceException.class, () -> board.service(new int[]{10, 2}, Origin.CONTROLLER));
     }
 
     @Test
-    @Disabled("makeMove is private now")
-    void testMakeMoveNonEmptyTile() {
-        //board.makeMove(1, 1);
-        //assertThrows(NonEmptyTileException.class, () -> board.makeMove(1, 1));
+    void testServiceNonEmptyTile() {
+        board.service(new int[]{1, 1}, Origin.CONTROLLER);
+        assertThrows(NonEmptyTileException.class, () -> board.service(new int[]{1, 1}, Origin.CONTROLLER));
     }
 
     @Test
-    @Disabled("makeMove is private now")
-    void testMakeMoveSwitchTurns() {
-        //board.makeMove(0);
+    void testServiceSwitchTurns() {
+        board.service(new int[]{0}, Origin.CONTROLLER);
         assertFalse(board.isGameOver());
-        //board.makeMove(4);
+        board.service(new int[]{4}, Origin.CONTROLLER);
         assertFalse(board.isGameOver());
         assertEquals(0b000010000, board.getBitMapPlayer2());
     }
 
     @Test
-    @Disabled("makeMove is private now")
     void testIsGameOverWithWin() {
-        //board.makeMove(0);
-        //board.makeMove(3);
-        //board.makeMove(1);
-        ////board.makeMove(4);
-        //board.makeMove(2);
+        board.service(new int[]{0}, Origin.CONTROLLER);
+        board.service(new int[]{3}, Origin.CONTROLLER);
+        board.service(new int[]{1}, Origin.CONTROLLER);
+        board.service(new int[]{4}, Origin.CONTROLLER);
+        board.service(new int[]{2}, Origin.CONTROLLER);
         assertTrue(board.isGameOver());
     }
 
     @Test
-    @Disabled("makeMove is private now")
     void testIsGameOverWithDraw() {
-        //board.makeMove(0);
-        //board.makeMove(1);
-        //board.makeMove(2);
-        //board.makeMove(3);
-        //board.makeMove(5);
-        //board.makeMove(4);
-        //board.makeMove(6);
-        //board.makeMove(8);
-        //board.makeMove(7);
+        board.service(new int[]{0}, Origin.CONTROLLER);
+        board.service(new int[]{1}, Origin.CONTROLLER);
+        board.service(new int[]{2}, Origin.CONTROLLER);
+        board.service(new int[]{3}, Origin.CONTROLLER);
+        board.service(new int[]{5}, Origin.CONTROLLER);
+        board.service(new int[]{4}, Origin.CONTROLLER);
+        board.service(new int[]{6}, Origin.CONTROLLER);
+        board.service(new int[]{8}, Origin.CONTROLLER);
+        board.service(new int[]{7}, Origin.CONTROLLER);
         assertTrue(board.isGameOver());
     }
 
@@ -90,15 +84,17 @@ class BoardTest {
     }
 
     @Test
-    @Disabled("makeMove is private now")
-    void testMakeMoveWithInvalidSize() {
-        //assertThrows(OutOfBounceException.class, () -> board.makeMove(9));
+    void testServiceArgSizeToSmall() {
+        assertThrows(WrongArgSizeException.class, () -> this.board.service(new int[0], Origin.CONTROLLER));
+    }
+    @Test
+    void testServiceArgSizeToLarge() {
+        assertThrows(WrongArgSizeException.class, () -> this.board.service(new int[3], Origin.CONTROLLER));
     }
 
     @Test
-    @Disabled("makeMove is private now")
-    void testMakeMoveWithInvalidSizeInRowAndCol() {
-        //assertThrows(OutOfBounceException.class, () -> board.makeMove(10, 2));
+    void testServiceNullPointer() {
+        assertThrows(NullPointerException.class, () -> this.board.service(null, Origin.CONTROLLER));
     }
 
 }
