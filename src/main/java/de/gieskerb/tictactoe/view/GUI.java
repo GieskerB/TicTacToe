@@ -1,5 +1,8 @@
 package main.java.de.gieskerb.tictactoe.view;
 
+import main.java.de.gieskerb.tictactoe.controller.MouseClick;
+import main.java.de.gieskerb.tictactoe.model.Updater;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -7,14 +10,17 @@ public class GUI extends Visual {
 
     private JFrame window;
 
-    public GUI (int pixelSize, int boardSize) {
+
+    public GUI (Updater updater, int pixelSize, int boardSize) {
 
         JPanel tmp = new JPanel();
         tmp.setSize(pixelSize, pixelSize);
         tmp.setPreferredSize(tmp.getSize());
         tmp.setLayout(new GridLayout(boardSize,boardSize));
-        for(int i = 0; i< boardSize * boardSize; i++) {
-            tmp.add(new JButton());
+        for(byte i = 0; i< boardSize * boardSize; i++) {
+            JButton button = new JButton();
+            button.addActionListener(new MouseClick(updater, i));
+            tmp.add(button);
         }
 
         try {

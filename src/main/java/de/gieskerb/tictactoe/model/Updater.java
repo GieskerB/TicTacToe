@@ -34,6 +34,10 @@ public abstract class Updater {
         }
     }
 
+    public void service(int arg, Origin origin) {
+        this.service(new int[] {arg}, origin);
+    }
+
     public abstract void service(int[] args, Origin origin);
 
 

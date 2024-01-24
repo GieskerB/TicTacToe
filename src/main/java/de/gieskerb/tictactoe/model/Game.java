@@ -3,6 +3,7 @@ package main.java.de.gieskerb.tictactoe.model;
 import main.java.de.gieskerb.tictactoe.exceptions.NotAllowedActionException;
 import main.java.de.gieskerb.tictactoe.player.Human;
 import main.java.de.gieskerb.tictactoe.player.Player;
+import main.java.de.gieskerb.tictactoe.view.Console;
 import main.java.de.gieskerb.tictactoe.view.GUI;
 import main.java.de.gieskerb.tictactoe.view.Visual;
 
@@ -38,8 +39,7 @@ public class Game {
 
         this.size = 0;
         this.board = null;
-
-        this.visual = new GUI(690,size);
+        this.visual = null;
 
     }
 
@@ -80,6 +80,14 @@ public class Game {
         var temp = this.player2;
         this.player2 = newPlayer;
         return temp;
+    }
+
+    public void showConsole() {
+        this.visual = new Console();
+    }
+
+    public void showGUI() {
+        this.visual = new GUI(this.board, 690, this.size);
     }
 
 }

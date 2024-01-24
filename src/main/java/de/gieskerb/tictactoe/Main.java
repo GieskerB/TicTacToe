@@ -8,6 +8,8 @@ import main.java.de.gieskerb.tictactoe.model.GameState;
 public class Main {
     public static void main (String[] args)  {
         Game game = new Game();
+        game.newGame();
+        game.showGUI();
     }
 
 }
