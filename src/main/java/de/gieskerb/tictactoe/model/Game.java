@@ -83,7 +83,7 @@ public class Game {
     }
 
     public void showConsole() {
-        this.visual = new Console();
+        this.visual = new Console(this.board, this.size);
     }
 
     public void showGUI() {

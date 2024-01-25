@@ -8,31 +8,61 @@ import java.awt.*;
 
 public class GUI extends Visual {
 
+    /**
+     * GUI - Window: Storing and displaying all the necessary components for user interactions.
+     */
     private JFrame window;
 
+    /**
+     * Array with all tiles of the board. A tile in this case is a button for a more easy check if player
+     * clicked that tile. Need to store all the tiles in an array for later access when displaying the board
+     * for example.
+     */
+    private JButton[] tiles;
 
-    public GUI (Updater updater, int pixelSize, int boardSize) {
+    /**
+     * Creates a simple JFrame UI with a tic-tac-toe board being displayed. Number of rows and
+     * columns are determent by the boardSize.
+     * @param updater This implementation uses the MVC concept for updating each action. Therefore the Model
+     *               (Updater) is required here.
+     * @param pixelSize Literal visual size of the board.
+     * @param boardSize number of row and column of the board.
+     */
+    public GUI (Updater updater, int pixelSize, byte boardSize) {
+        super(updater, boardSize);
 
-        JPanel tmp = new JPanel();
-        tmp.setSize(pixelSize, pixelSize);
-        tmp.setPreferredSize(tmp.getSize());
-        tmp.setLayout(new GridLayout(boardSize,boardSize));
-        for(byte i = 0; i< boardSize * boardSize; i++) {
-            JButton button = new JButton();
-            button.addActionListener(new MouseClick(updater, i));
-            tmp.add(button);
+        final byte BOARD_SIZE_SQUARED = (byte) (super.boardSize * super.boardSize);
+        // background is a container which holds all the tiles.
+        JPanel background = new JPanel();
+        background.setBackground(new Color (16,16,16));
+        background.setSize(pixelSize, pixelSize);
+        background.setPreferredSize(background.getSize());
+        background.setLayout(new GridLayout(super.boardSize,super.boardSize, 3, 3));
+
+        // Setting up each tile form the board with some extra visual benefits like color and font.
+        this.tiles = new JButton[BOARD_SIZE_SQUARED];
+        for(byte i = 0; i< BOARD_SIZE_SQUARED; i++) {
+            this.tiles[i] = new JButton();
+            this.tiles[i].setFocusable(false);
+            this.tiles[i].setBorderPainted(false);
+            this.tiles[i].setBackground(new Color (69,69,69));
+            this.tiles[i].setForeground(new Color (255,127,15));
+            this.tiles[i].setFont(new Font("Tahoma", Font.BOLD, 69));
+            this.tiles[i].addMouseListener(new MouseClick(super.updater, i));
+            background.add(this.tiles[i]);
         }
 
+        // Using a way better look and feel then the default "metal" design.
         try {
-            //UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
             UIManager.setLookAndFeel(
                     UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
             System.err.println("Look and feel not set.");
         }
 
+        // Finally initializing the JFrame and adding all the stuff to it.
         this.window = new JFrame();
-        this.window.add(tmp);
+        this.window.add(background);
         this.window.pack();
         this.window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.window.setLocationRelativeTo(null);
@@ -43,6 +73,13 @@ public class GUI extends Visual {
 
     @Override
     public void update(Object obj) {
-
+        int[] args = (int[]) obj;
+        if (args.length == 1) {
+            for(var b: this.tiles) {
+                b.setText("");
+            }
+        } else {
+          this.tiles[args[0]].setText(args[1] == 0 ? "X": "O");
+        }
     }
 }

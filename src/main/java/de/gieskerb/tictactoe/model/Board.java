@@ -5,6 +5,9 @@ import main.java.de.gieskerb.tictactoe.exceptions.OutOfBounceException;
 import main.java.de.gieskerb.tictactoe.exceptions.WrongArgSizeException;
 import main.java.de.gieskerb.tictactoe.exceptions.WrongBoardSizeException;
 
+import javax.swing.*;
+import java.util.Arrays;
+
 /**
  * Board handles the game logic:
  * Making a move.
@@ -150,6 +153,35 @@ public class Board extends Updater {
      */
     private void afterMove() {
         this.currentTurn = !this.currentTurn;
+        int result = -1;
+        if (this.checkWin(this.currentTurn) || this.checkWin(!this.currentTurn)) {
+            result = JOptionPane.showOptionDialog(null,
+                    "Player " + (!this.currentTurn ? 'X' : 'O') + " has won the game!", "Game  Over",
+                    JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, null,
+                    new String[]{"Rematch", "Quit"}, "Rematch");
+        }else if (this.checkFull()) {
+            result =  JOptionPane.showOptionDialog(null, "Game has ended in a Tie!", "Game  Over",
+                    JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, null,
+                    new String[]{"Rematch", "Quit"}, "Rematch");
+        }
+        switch (result) {
+            case -1:
+                // Game continues
+                break;
+            case 0:
+                this.reset();
+                break;
+            case 1:
+                System.exit(0);
+                break;
+        }
+    }
+
+    private void reset() {
+        this.currentTurn= true;
+        this.bitMapPlayer1 = 0;
+        this.bitMapPlayer2 = 0;
+        super.fireUpdate(new int[] {-1});
     }
 
     @Override
@@ -216,6 +248,8 @@ public class Board extends Updater {
         } else {
             this.bitMapPlayer2 |= placeMoveBitmap;
         }
+        super.fireUpdate(new int[]{tile,this.currentTurn ? 0:1});
+
     }
 
     /**
@@ -251,7 +285,6 @@ public class Board extends Updater {
      */
     public boolean isGameOver() {
         return this.checkWin(true) || this.checkWin(false) || this.checkFull();
-
     }
 
 }
