@@ -3,6 +3,8 @@ package main.java.de.gieskerb.tictactoe.controller;
 import main.java.de.gieskerb.tictactoe.model.Origin;
 import main.java.de.gieskerb.tictactoe.model.Updater;
 
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -10,14 +12,12 @@ import java.awt.event.MouseListener;
 
 public class MouseClick extends InputDevice implements MouseListener {
 
-    private Updater updater;
-    private byte index;
+    private final Updater updater;
 
 
-    public MouseClick(Updater updater, byte index) {
+    public MouseClick(Updater updater) {
         this.updater = updater;
         this.updater.attach(this);
-        this.index = index;
     }
 
     @Override
@@ -27,9 +27,14 @@ public class MouseClick extends InputDevice implements MouseListener {
 
     @Override
     public void mousePressed(MouseEvent e) {
-        if (e.getButton() == MouseEvent.BUTTON1) {
-            this.updater.service( Origin.CONTROLLER, this.index);
-        }}
+        final JPanel source = ((JPanel)e.getSource());
+        final int sourceWidth = source.getSize().width;
+        final int rows = ((GridLayout)source.getLayout()).getRows();
+
+        // Switch around for right Indexing.
+        this.updater.service(Origin.CONTROLLER,  e.getY() / (sourceWidth / rows),e.getX() / (sourceWidth / rows));
+
+    }
 
     @Override
     public void mouseClicked(MouseEvent e) {    }

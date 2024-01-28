@@ -29,8 +29,10 @@ public abstract class Updater {
     }
 
     public final void fireUpdate(Object... obj) {
-        for(var notifiable: this.updatableList) {
-            notifiable.update(obj);
+        for(Updatable updatable: this.updatableList) {
+            updatable.update(obj);
+            //Thread t = new Thread(() -> updatable.update(obj));
+            //t.start();
         }
     }
 

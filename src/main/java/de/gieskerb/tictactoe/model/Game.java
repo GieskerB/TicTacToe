@@ -8,7 +8,7 @@ import main.java.de.gieskerb.tictactoe.view.Console;
 import main.java.de.gieskerb.tictactoe.view.GUI;
 import main.java.de.gieskerb.tictactoe.view.Visual;
 
-public class Game extends Updater{
+public class Game extends Updater {
 
     private Visual visual;
 
@@ -21,19 +21,19 @@ public class Game extends Updater{
     private byte round;
 
     public Game() {
-        this( new Human(true));
+        this(new Human(true));
     }
 
-    public Game( String nameP1) {
-        this(new Human(nameP1,true));
+    public Game(String nameP1) {
+        this(new Human(nameP1, true));
     }
 
-    public Game( Player p1) {
+    public Game(Player p1) {
         this(p1, new Human(false));
     }
 
-    public Game( String nameP1, String nameP2) {
-        this( new Human(nameP1,true), new Human(nameP2, false));
+    public Game(String nameP1, String nameP2) {
+        this(new Human(nameP1, true), new Human(nameP2, false));
     }
 
     public Game(Player p1, Player p2) {
@@ -61,12 +61,12 @@ public class Game extends Updater{
 
     public void newGame(int size) {
         this.changeSize(size);
-        this.board = new Board( this.size);
+        this.board = new Board(this.size);
         this.reset();
     }
 
     public void restartGame() {
-        if(this.size == 0|| this.board == null) {
+        if (this.size == 0 || this.board == null) {
             throw new NotAllowedActionException("You can not restart a game if you never started one in the first place.");
         }
         this.reset();
@@ -82,13 +82,13 @@ public class Game extends Updater{
         this.player2 = temp;
     }
 
-    public Player changePlayer1To (Player newPlayer) {
+    public Player changePlayer1To(Player newPlayer) {
         var temp = this.player1;
         this.player1 = newPlayer;
         return temp;
     }
 
-    public Player changePlayer2To (Player newPlayer) {
+    public Player changePlayer2To(Player newPlayer) {
         var temp = this.player2;
         this.player2 = newPlayer;
         return temp;
@@ -99,12 +99,12 @@ public class Game extends Updater{
     }
 
     public void showGUI() {
-        this.visual = new GUI(this,this.player1,this.player2, 690, this.size);
+        this.visual = new GUI(this, 690, this.size);
     }
 
     public void reset() {
         this.board.reset();
-        super.fireUpdate(new int[] {-1});
+        super.fireUpdate(-1);
     }
 
 
@@ -113,28 +113,23 @@ public class Game extends Updater{
         final int ARG_SIZE = args.length;
         switch (origin) {
             case CONTROLLER:
+            case COMPUTER:
                 if (ARG_SIZE != 1 && ARG_SIZE != 2) {
                     throw new WrongArgSizeException("The expected number of args from a controller is one or two.");
                 }
-                //final int tileIndex = args.length == 1 ?  args[0]: Board.convertCoordsToIndex(args[0], args[1], this.size);
-                // this.board.makeMove(tileIndex);
-              // this.board.afterMove();
 
-
-                //super.fireUpdate(tileIndex, (this.round % 2 == 1 ? 0:1));
-            case PLAYER:
-
-                final int tileIndex = args.length == 1 ?  args[0]: Board.convertCoordsToIndex(args[0], args[1], this.size);
+                final int tileIndex = args.length == 1 ? args[0] : Board.convertCoordsToIndex(args[0], args[1], this.size);
                 this.board.makeMove(tileIndex);
+                super.fireUpdate(tileIndex, (this.round % 2 == 1 ? 0 : 1));
                 this.board.afterMove();
-                super.fireUpdate(tileIndex, (this.round % 2 == 1 ? 0:1));
+                break;
 
 
         }
 
+        round++;
         player1.switchTurn();
         player2.switchTurn();
-        round++;
     }
 
 }
