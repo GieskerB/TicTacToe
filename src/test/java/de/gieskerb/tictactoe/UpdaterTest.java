@@ -1,4 +1,4 @@
-package test.java.de.gieskerb.tictactoe.model;
+package test.java.de.gieskerb.tictactoe;
 
 import main.java.de.gieskerb.tictactoe.model.Origin;
 import main.java.de.gieskerb.tictactoe.model.Updatable;
@@ -15,20 +15,21 @@ class UpdaterTest {
     private final static int NUM_UPDATEBALES = 5;
 
     private int editableCounter = 0;
+
     @BeforeEach
     void setUP() {
         this.updater = new Updater() {
             @Override
-            public void service(int[] args, Origin origin) {
+            public void service(Origin origin, int... args) {
                 editableCounter += 100;
             }
         };
 
         this.updatables = new Updatable[NUM_UPDATEBALES];
-        for (int i = 0; i< NUM_UPDATEBALES; i++) {
+        for (int i = 0; i < NUM_UPDATEBALES; i++) {
             this.updatables[i] = new Updatable() {
                 @Override
-                public void update(Object obj) {
+                public void update(Object... obj) {
                     editableCounter += 1;
                 }
             };
@@ -42,19 +43,20 @@ class UpdaterTest {
         this.updater.attach(this.updatables[3]);
         this.updater.attach(this.updatables[4]);
     }
+
     @Test
-    void testAttach () {
+    void testAttach() {
         this.fillUpdater();
-        assertDoesNotThrow( () -> this.updater.attach(this.updatables[0]));
-        assertDoesNotThrow( () -> this.updater.attach(null));
+        assertDoesNotThrow(() -> this.updater.attach(this.updatables[0]));
+        assertDoesNotThrow(() -> this.updater.attach(null));
     }
 
     @Test
-    void testDetach () {
+    void testDetach() {
         this.fillUpdater();
         this.updater.detach(this.updatables[0]);
-        assertDoesNotThrow( () -> this.updater.detach(this.updatables[0]));
-        assertDoesNotThrow( () -> this.updater.detach(null));
+        assertDoesNotThrow(() -> this.updater.detach(this.updatables[0]));
+        assertDoesNotThrow(() -> this.updater.detach(null));
     }
 
     @Test
@@ -82,8 +84,8 @@ class UpdaterTest {
 
     @Test
     void testService() {
-        this.updater.service(new int[0], Origin.CONTROLLER);
-        assertEquals(this.editableCounter,100);
+        this.updater.service(Origin.CONTROLLER, 0);
+        assertEquals(this.editableCounter, 100);
     }
 
 }

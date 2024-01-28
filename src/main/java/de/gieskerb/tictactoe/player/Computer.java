@@ -2,6 +2,8 @@ package main.java.de.gieskerb.tictactoe.player;
 
 import main.java.de.gieskerb.tictactoe.model.GameState;
 
+import java.awt.event.MouseEvent;
+
 public class Computer extends Player{
 
     private static byte totalComputerCount = 0;
@@ -9,8 +11,4 @@ public class Computer extends Player{
         super("Computer " + ++totalComputerCount, isPlayerOne);
     }
 
-    @Override
-    public byte getMove(GameState gameState) {
-        return 0;
-    }
 }

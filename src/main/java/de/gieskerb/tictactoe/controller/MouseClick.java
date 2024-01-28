@@ -21,14 +21,14 @@ public class MouseClick extends InputDevice implements MouseListener {
     }
 
     @Override
-    public void update(Object obj) {
+    public void update(Object... obj) {
 
     }
 
     @Override
     public void mousePressed(MouseEvent e) {
         if (e.getButton() == MouseEvent.BUTTON1) {
-            this.updater.service(this.index, Origin.CONTROLLER);
+            this.updater.service( Origin.CONTROLLER, this.index);
         }}
 
     @Override

@@ -2,11 +2,11 @@ package main.java.de.gieskerb.tictactoe.model;
 
 import main.java.de.gieskerb.tictactoe.exceptions.NonEmptyTileException;
 import main.java.de.gieskerb.tictactoe.exceptions.OutOfBounceException;
-import main.java.de.gieskerb.tictactoe.exceptions.WrongArgSizeException;
 import main.java.de.gieskerb.tictactoe.exceptions.WrongBoardSizeException;
+import test.java.de.gieskerb.tictactoe.FriendTestAccess;
+import test.java.de.gieskerb.tictactoe.Testable;
 
 import javax.swing.*;
-import java.util.Arrays;
 
 /**
  * Board handles the game logic:
@@ -14,7 +14,7 @@ import java.util.Arrays;
  * Checking for correctness.
  * Win detection
  */
-public class Board extends Updater {
+public class Board implements Updatable, Testable {
 
     /**
      * number of rows and columns of the board.
@@ -38,6 +38,31 @@ public class Board extends Updater {
      * True means it's players one turn, false says its players two turn.
      */
     private boolean currentTurn;
+
+    /**
+     * Simple helper function to convert from coordinates to index. But when converting
+     * out of bounce this method will throw an exception.
+     * <p>
+     * Example:
+     * +---+---+---+    +---+---+---+
+     * |0,0|0,1|0,2|    | 0 | 1 | 2 |
+     * +---+---+---+    +---+---+---+
+     * |1,0|1,1|1,2| => | 3 | 4 | 5 |
+     * +---+---+---+    +---+---+---+
+     * |2,0|2,1|2,2|    | 6 | 7 | 8 |
+     * +---+---+---+    +---+---+---+
+     *
+     * @param row starting at zero from top to bottom and
+     * @param col also starting at zero form left to right identifies location
+     * @return index based on row and col
+     */
+    static int convertCoordsToIndex(int row, int col, byte size) {
+        if (row < 0 || row >= size || col < 0 || col >= size) {
+            throw new OutOfBounceException("Row: " + row + "or Column: " + col + " is not in bound for a board of size "
+                    + size + ". Argument must be in range 0 - " + (size - 1) + ".");
+        }
+        return row * size + col;
+    }
 
     /**
      * Checking for a win by comparing each row, column and diagonal with the winning patterns generated earlier.
@@ -127,6 +152,7 @@ public class Board extends Updater {
         // this.size rows + this.size columns + 2 diagonals
         this.bitMapPatterns = new long[this.size * 2 + 2];
         initPatterns();
+
     }
 
     /**
@@ -151,7 +177,7 @@ public class Board extends Updater {
      * Everything need to be done after a players move to perpare for the next one.
      * 1. Change which player is currently playing
      */
-    private void afterMove() {
+    void afterMove() {
         this.currentTurn = !this.currentTurn;
         int result = -1;
         if (this.checkWin(this.currentTurn) || this.checkWin(!this.currentTurn)) {
@@ -159,8 +185,8 @@ public class Board extends Updater {
                     "Player " + (!this.currentTurn ? 'X' : 'O') + " has won the game!", "Game  Over",
                     JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, null,
                     new String[]{"Rematch", "Quit"}, "Rematch");
-        }else if (this.checkFull()) {
-            result =  JOptionPane.showOptionDialog(null, "Game has ended in a Tie!", "Game  Over",
+        } else if (this.checkFull()) {
+            result = JOptionPane.showOptionDialog(null, "Game has ended in a Tie!", "Game  Over",
                     JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, null,
                     new String[]{"Rematch", "Quit"}, "Rematch");
         }
@@ -177,27 +203,12 @@ public class Board extends Updater {
         }
     }
 
-    private void reset() {
-        this.currentTurn= true;
+    void reset() {
+        this.currentTurn = true;
         this.bitMapPlayer1 = 0;
         this.bitMapPlayer2 = 0;
-        super.fireUpdate(new int[] {-1});
     }
 
-    @Override
-    public void service(int[] args, Origin origin) {
-        final int ARG_SIZE = args.length;
-        switch (origin) {
-            case CONTROLLER:
-                if (ARG_SIZE != 1 && ARG_SIZE != 2) {
-                    throw new WrongArgSizeException("The expected number of args from a controller is one or two.");
-                }
-                if (args.length == 1) this.makeMove(args[0]);
-                else this.makeMove(args[0], args[1]);
-                this.afterMove();
-
-        }
-    }
 
     /**
      * Self-Explanatory: Reducing this object to a GameState
@@ -220,7 +231,7 @@ public class Board extends Updater {
      *             |6|7|8|
      *             +-+-+-+
      */
-    private void makeMove(int tile) {
+    void makeMove(int tile) {
         final byte sizeSquared = (byte) (this.size * this.size);
         // Throwing an exception if move is invalid.
         if (tile < 0 || tile >= sizeSquared) {
@@ -248,31 +259,6 @@ public class Board extends Updater {
         } else {
             this.bitMapPlayer2 |= placeMoveBitmap;
         }
-        super.fireUpdate(new int[]{tile,this.currentTurn ? 0:1});
-
-    }
-
-    /**
-     * Tries to make a move on the board. Illegal placements like out of bounce and already occupies
-     * * will throw an exception.
-     *
-     * @param row starting at zero from top to bottom and
-     * @param col also starting at zero form left to right identifies location:
-     *            +---+---+---+
-     *            |0,0|0,1|0,2|
-     *            +---+---+---+
-     *            |1,0|1,1|1,2|
-     *            +---+---+---+
-     *            |2,0|2,1|2,2|
-     *            +---+---+---+
-     */
-    private void makeMove(int row, int col) {
-        if (row < 0 || row >= this.size || col < 0 || col >= this.size) {
-            throw new OutOfBounceException("Row: " + row + "or Column: " + col + " is not in bound for a board of size "
-                    + this.size + ". Argument must be in range 0 - " + (this.size - 1) + ".");
-        }
-        this.makeMove(row * this.size + col);
-
     }
 
     /**
@@ -287,5 +273,27 @@ public class Board extends Updater {
         return this.checkWin(true) || this.checkWin(false) || this.checkFull();
     }
 
+    @Override
+    public void update(Object... obj) {
+
+    }
+
+    @Override
+    public Object invokeMethod(FriendTestAccess fta) {
+
+        switch (fta.getMethodName()) {
+            case "makeMove":
+                if (fta.argsLength() == 1) {
+                    this.makeMove((int) fta.getArg(0));
+                } else {
+                    this.makeMove(Board.convertCoordsToIndex((int) fta.getArg(0), (int) fta.getArg(1), this.size));
+                }
+            break;
+            case "afterMove":
+                this.afterMove();
+        }
+
+        return null;
+    }
 }
 

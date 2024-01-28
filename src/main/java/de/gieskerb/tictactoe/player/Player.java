@@ -1,39 +1,46 @@
 package main.java.de.gieskerb.tictactoe.player;
 
 import main.java.de.gieskerb.tictactoe.model.GameResult;
+import main.java.de.gieskerb.tictactoe.model.GameState;
+import main.java.de.gieskerb.tictactoe.model.Game;
 
-public abstract class Player implements TicTacToePlayable {
+import java.awt.event.MouseAdapter;
 
+public abstract class Player extends MouseAdapter implements TicTacToePlayable {
 
-    private static final char[] BASE64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".toCharArray();
+    Game gamePointer;
 
-    private final String name;
+    final String name;
 
-    private boolean isPlayerOne;
+    boolean isPlayerOne, isMyTurn;
 
     /**
      * This array will store the game outcomes.
-     *      0: win
-     *      1: draw
-     *      2: lose
+     * 0: win
+     * 1: draw
+     * 2: lose
      */
     private final short[] score;
 
     Player(String name, boolean isPlayerOne) {
         this.name = name;
         this.isPlayerOne = isPlayerOne;
+        this.isMyTurn = this.isPlayerOne;
         this.score = new short[3];
+
+        this.gamePointer = null;
+
     }
 
     public void notifyGameResult(GameResult gr) {
         switch (gr) {
-            case WIN :
+            case WIN:
                 ++this.score[0];
                 break;
-            case DRAW :
+            case DRAW:
                 ++this.score[1];
                 break;
-            case LOSE :
+            case LOSE:
                 ++this.score[2];
                 break;
         }
@@ -51,4 +58,18 @@ public abstract class Player implements TicTacToePlayable {
                 '\n';
     }
 
+    @Override
+    public byte getMove(GameState gameState) {
+        return 0;
+    }
+
+
+    public void setGamePointer(Game gamePointer) {
+        this.gamePointer = gamePointer;
+    }
+
+    @Override
+    public void switchTurn() {
+        this.isMyTurn = ! this.isMyTurn;
+    }
 }

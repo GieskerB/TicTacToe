@@ -1,4 +1,4 @@
-package test.java.de.gieskerb.tictactoe.model;
+package test.java.de.gieskerb.tictactoe;
 
 import main.java.de.gieskerb.tictactoe.model.Board;
 import main.java.de.gieskerb.tictactoe.model.DebugPrinter;
@@ -25,9 +25,11 @@ class DebugPrinterTest {
     @BeforeEach
     void setUp() {
         Board board = new Board(2);
-        board.service(new int[]{1}, Origin.CONTROLLER);
-        board.service(new int[]{0}, Origin.CONTROLLER);
-        board.service(new int[]{2}, Origin.CONTROLLER);
+        board.invokeMethod(new FriendTestAccess("makeMove", 1));
+        board.invokeMethod(new FriendTestAccess("afterMove"));
+        board.invokeMethod(new FriendTestAccess("makeMove", 0));
+        board.invokeMethod(new FriendTestAccess("afterMove"));
+        board.invokeMethod(new FriendTestAccess("makeMove", 2));
         dp = new DebugPrinter(board);
     }
 

@@ -6,4 +6,7 @@ public interface TicTacToePlayable {
 
     byte getMove(GameState gameState);
 
+
+    public void switchTurn() ;
+
 }

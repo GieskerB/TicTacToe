@@ -1,13 +1,14 @@
 package main.java.de.gieskerb.tictactoe.model;
 
 import main.java.de.gieskerb.tictactoe.exceptions.NotAllowedActionException;
+import main.java.de.gieskerb.tictactoe.exceptions.WrongArgSizeException;
 import main.java.de.gieskerb.tictactoe.player.Human;
 import main.java.de.gieskerb.tictactoe.player.Player;
 import main.java.de.gieskerb.tictactoe.view.Console;
 import main.java.de.gieskerb.tictactoe.view.GUI;
 import main.java.de.gieskerb.tictactoe.view.Visual;
 
-public class Game {
+public class Game extends Updater{
 
     private Visual visual;
 
@@ -16,6 +17,8 @@ public class Game {
     private Player player1, player2;
 
     private byte size;
+
+    private byte round;
 
     public Game() {
         this( new Human(true));
@@ -35,12 +38,19 @@ public class Game {
 
     public Game(Player p1, Player p2) {
         this.player1 = p1;
+        this.player1.setGamePointer(this);
         this.player2 = p2;
+        this.player2.setGamePointer(this);
 
         this.size = 0;
+        this.round = 0;
         this.board = null;
         this.visual = null;
 
+    }
+
+    public int getRound() {
+        return this.round;
     }
 
     public void newGame() {
@@ -52,12 +62,14 @@ public class Game {
     public void newGame(int size) {
         this.changeSize(size);
         this.board = new Board( this.size);
+        this.reset();
     }
 
     public void restartGame() {
         if(this.size == 0|| this.board == null) {
             throw new NotAllowedActionException("You can not restart a game if you never started one in the first place.");
         }
+        this.reset();
     }
 
     public void changeSize(int newSize) {
@@ -83,11 +95,46 @@ public class Game {
     }
 
     public void showConsole() {
-        this.visual = new Console(this.board, this.size);
+        this.visual = new Console(this, this.size);
     }
 
     public void showGUI() {
-        this.visual = new GUI(this.board, 690, this.size);
+        this.visual = new GUI(this,this.player1,this.player2, 690, this.size);
+    }
+
+    public void reset() {
+        this.board.reset();
+        super.fireUpdate(new int[] {-1});
+    }
+
+
+    @Override
+    public void service(Origin origin, int... args) {
+        final int ARG_SIZE = args.length;
+        switch (origin) {
+            case CONTROLLER:
+                if (ARG_SIZE != 1 && ARG_SIZE != 2) {
+                    throw new WrongArgSizeException("The expected number of args from a controller is one or two.");
+                }
+                //final int tileIndex = args.length == 1 ?  args[0]: Board.convertCoordsToIndex(args[0], args[1], this.size);
+                // this.board.makeMove(tileIndex);
+              // this.board.afterMove();
+
+
+                //super.fireUpdate(tileIndex, (this.round % 2 == 1 ? 0:1));
+            case PLAYER:
+
+                final int tileIndex = args.length == 1 ?  args[0]: Board.convertCoordsToIndex(args[0], args[1], this.size);
+                this.board.makeMove(tileIndex);
+                this.board.afterMove();
+                super.fireUpdate(tileIndex, (this.round % 2 == 1 ? 0:1));
+
+
+        }
+
+        player1.switchTurn();
+        player2.switchTurn();
+        round++;
     }
 
 }

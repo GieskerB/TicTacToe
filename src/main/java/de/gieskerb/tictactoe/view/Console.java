@@ -1,5 +1,7 @@
 package main.java.de.gieskerb.tictactoe.view;
 
+import main.java.de.gieskerb.tictactoe.controller.InputDevice;
+import main.java.de.gieskerb.tictactoe.controller.TextInput;
 import main.java.de.gieskerb.tictactoe.model.Updater;
 
 import java.io.IOException;
@@ -8,11 +10,15 @@ public class Console extends Visual {
 
     char[][] displayBoard;
 
+    TextInput textInput;
+
     public Console(Updater updater, byte boardSize) {
         super(updater, boardSize);
 
         this.displayBoard = new char[super.boardSize][super.boardSize];
         this.clearBoard();
+
+        this.textInput = new TextInput();
 
         this.printBoard();
     }
@@ -20,12 +26,11 @@ public class Console extends Visual {
 
 
     @Override
-    public void update(Object obj) {
-        int[] args = (int[]) obj;
-        if (args.length == 1) {
+    public void update(Object... obj) {
+        if (obj.length == 1) {
             this.clearBoard();
         } else {
-            this.displayBoard[args[0] / super.boardSize][args[0] % super.boardSize] = (args[1] == 0 ? 'X' : 'O');
+            this.displayBoard[(int)obj[0] / super.boardSize][(int)obj[0] % super.boardSize] = ((int)obj[1] == 0 ? 'X' : 'O');
         }
         clearConsole();
         this.printBoard();

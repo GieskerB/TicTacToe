@@ -1,4 +1,4 @@
-package test.java.de.gieskerb.tictactoe.model;
+package test.java.de.gieskerb.tictactoe;
 
 import main.java.de.gieskerb.tictactoe.model.Board;
 import main.java.de.gieskerb.tictactoe.model.GameState;
@@ -17,10 +17,14 @@ class GameStateTest {
     void setUp() {
         // Board is subclass of GameState. Need this class to edit the GameState correctly
         Board board = new Board();
-        board.service(new int[] {2}, Origin.CONTROLLER);
-        board.service(new int[] {4}, Origin.CONTROLLER);
-        board.service(new int[] {0}, Origin.CONTROLLER);
-        board.service(new int[] {8}, Origin.CONTROLLER);
+        board.invokeMethod(new FriendTestAccess("makeMove",2));
+        board.invokeMethod(new FriendTestAccess("afterMove"));
+        board.invokeMethod(new FriendTestAccess("makeMove",4));
+        board.invokeMethod(new FriendTestAccess("afterMove"));
+        board.invokeMethod(new FriendTestAccess("makeMove",0));
+        board.invokeMethod(new FriendTestAccess("afterMove"));
+        board.invokeMethod(new FriendTestAccess("makeMove",8));
+        board.invokeMethod(new FriendTestAccess("afterMove"));
         this.gs = board.exportGameState();
     }
 

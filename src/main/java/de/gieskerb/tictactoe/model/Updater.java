@@ -28,17 +28,13 @@ public abstract class Updater {
         this.updatableList.remove(updatable);
     }
 
-    public final void fireUpdate(Object obj) {
+    public final void fireUpdate(Object... obj) {
         for(var notifiable: this.updatableList) {
             notifiable.update(obj);
         }
     }
 
-    public void service(int arg, Origin origin) {
-        this.service(new int[] {arg}, origin);
-    }
-
-    public abstract void service(int[] args, Origin origin);
+    public abstract void service(Origin origin, int... args);
 
 
 }

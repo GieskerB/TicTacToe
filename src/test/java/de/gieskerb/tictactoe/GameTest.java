@@ -1,4 +1,4 @@
-package test.java.de.gieskerb.tictactoe.model;
+package test.java.de.gieskerb.tictactoe;
 
 import main.java.de.gieskerb.tictactoe.model.Game;
 import org.junit.jupiter.api.BeforeEach;
