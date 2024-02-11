@@ -3,10 +3,12 @@ package main.java.de.gieskerb.tictactoe.model;
 import main.java.de.gieskerb.tictactoe.exceptions.NonEmptyTileException;
 import main.java.de.gieskerb.tictactoe.exceptions.OutOfBounceException;
 import main.java.de.gieskerb.tictactoe.exceptions.WrongBoardSizeException;
+import main.java.de.gieskerb.tictactoe.util.Pair;
 import test.java.de.gieskerb.tictactoe.FriendTestAccess;
 import test.java.de.gieskerb.tictactoe.Testable;
 
 import javax.swing.*;
+import java.util.Arrays;
 
 /**
  * Board handles the game logic:
@@ -17,107 +19,80 @@ import javax.swing.*;
 public class Board implements Updatable, Testable {
 
     /**
+     * Even though the game should be scalable the size will be caped at a specific value. This one is set based on
+     * performance and visual clustering.
+     */
+    final static byte MAX_BOARD_SIZE = 15;
+
+    /**
      * number of rows and columns of the board.
      */
     final byte size;
 
     /**
-     * Bitmaps contain information about the location where a player made a move.
-     * A one in the map says the player made a move in that location.
-     * Going from LSB to MSB in the bitmap, it will represent the game tile
-     * from the bottom right going from right to left and bottom to top.
+     * Two-dimensional array storing all the information about the board.
+     * +1: Player 1
+     * -1: Player 2
+     * 0: Empty
      */
-    private long bitMapPlayer1, bitMapPlayer2;
-
-    /**
-     * A list of bitmaps to compare to when checking for a win.
-     */
-    final long[] bitMapPatterns;
+    byte[][] tiles;
 
     /**
      * True means it's players one turn, false says its players two turn.
      */
     private boolean currentTurn;
 
+
     /**
-     * Simple helper function to convert from coordinates to index. But when converting
+     * Simple helper function to convert from index to coordinates. But when converting
      * out of bounce this method will throw an exception.
      * <p>
      * Example:
      * +---+---+---+    +---+---+---+
-     * |0,0|0,1|0,2|    | 0 | 1 | 2 |
+     * | 0 | 1 | 2 |    |0,0|0,1|0,2|
      * +---+---+---+    +---+---+---+
-     * |1,0|1,1|1,2| => | 3 | 4 | 5 |
+     * | 3 | 4 | 5 | => |1,0|1,1|1,2|
      * +---+---+---+    +---+---+---+
-     * |2,0|2,1|2,2|    | 6 | 7 | 8 |
+     * | 6 | 7 | 8 |    |2,0|2,1|2,2|
      * +---+---+---+    +---+---+---+
      *
-     * @param row starting at zero from top to bottom and
-     * @param col also starting at zero form left to right identifies location
-     * @return index based on row and col
+     * @param index will be converted into a Pair of coordinates.
+     * @param size  of the board
+     * @return Pair of coordinates: row and column based on index.
      */
-    static int convertCoordsToIndex(int row, int col, byte size) {
-        if (row < 0 || row >= size || col < 0 || col >= size) {
-            throw new OutOfBounceException("Row: " + row + "or Column: " + col + " is not in bound for a board of size "
-                    + size + ". Argument must be in range 0 - " + (size - 1) + ".");
+    static Pair<Byte, Byte> convertIndexToCoords(int index, byte size) {
+        if(index < 0 || index >= size*size) {
+            throw new OutOfBounceException("Index: " + index + " does not match with board of size "
+                    + size + "x" + size + "!");
         }
-        return row * size + col;
+        return new Pair<>((byte) (index / size), (byte) (index % size));
     }
 
     /**
-     * Checking for a win by comparing each row, column and diagonal with the winning patterns generated earlier.
+     * Checking for a win. Adding all values for each row, column and diagonal and compareing it to
+     * the size of the board will tell if a player has won the game.
      *
-     * @param playerOne Determine which bitMap needs to be checked for a win.
-     * @return Did the given player win?
+     * @return If the current gamest ate is a win or not!
      */
-    private boolean checkWin(boolean playerOne) {
-        for (long bitMapPattern : this.bitMapPatterns) {
-            // Logical conjunction between bitMapPattern for a win and the bitmap of the current player
-            if ((bitMapPattern & (playerOne ? this.bitMapPlayer1 : this.bitMapPlayer2)) == bitMapPattern) {
+    private boolean checkWin() {
+        byte diagonalTLBRSum = 0, diagonalTRBLSum = 0;
+        for (int i = 0; i < this.size; i++) {
+            byte rowSum = 0, colSum = 0;
+            for (int j = 0; j < this.size; j++) {
+                // Adding the values: Once for each row and once for each column.
+                rowSum += this.tiles[j][i];
+                colSum += this.tiles[i][j];
+            }
+            // If the sum equals the size of the board the row or column is filled. Therefor the game is won.
+            if (Math.abs(rowSum) == this.size || Math.abs(colSum) == this.size) {
                 return true;
             }
+            // Also adding up the diagonales.
+            diagonalTLBRSum += this.tiles[i][i];
+            diagonalTRBLSum += this.tiles[this.size - i - 1][i];
         }
-        return false;
-    }
-
-    /**
-     * Creates all patterns to later check for a win.
-     * A pattern is a bitmap that represents each row, column and diagonal.
-     * When logically continuing what pattern and a players bitmap and result
-     * os the same pattern again, player has won the game.
-     */
-    private void initPatterns() {
-        // Row-patterns:
-        long patternTemplate = (1L << this.size) - 1;
-        int index = 0;
-        for (int i = 0; i < this.size; i++) {
-            this.bitMapPatterns[index++] = patternTemplate << (i * this.size);
-        }
-        // Column-patterns:
-        patternTemplate = 1L;
-        for (int i = 0; i < this.size - 1; i++) {
-            patternTemplate <<= this.size;
-            patternTemplate |= 1L;
-        }
-        for (int i = 0; i < this.size; i++) {
-            this.bitMapPatterns[index++] = patternTemplate << i;
-        }
-        // Diagonal-patterns TL-BR
-        patternTemplate = 1L;
-        for (int i = 0; i < this.size - 1; i++) {
-            patternTemplate <<= this.size + 1;
-            patternTemplate |= 1L;
-        }
-        this.bitMapPatterns[index++] = patternTemplate;
-        // Diagonal-patterns BL-TR
-        patternTemplate = 1L;
-        for (int i = 0; i < this.size - 1; i++) {
-            patternTemplate <<= this.size - 1;
-            patternTemplate |= 1L;
-        }
-        patternTemplate <<= this.size - 1;
-        this.bitMapPatterns[index] = patternTemplate;
-
+        // Simplified expression: If diagonal is filled: game is won. Otherwise, it isn't.
+        return Math.abs(diagonalTLBRSum) == this.size || Math.abs(diagonalTRBLSum) == this.size;
     }
 
 
@@ -125,9 +100,14 @@ public class Board implements Updatable, Testable {
      * @return Is every tile on the board filled?
      */
     private boolean checkFull() {
-        // Left side long has 'size * size' zeros.
-        // Right side (if board is truly full) has 'size * size' ones. Plus one equals left.
-        return (1L << this.size * this.size) == ((this.bitMapPlayer1 | this.bitMapPlayer2) + 1);
+        for (int row = 0; row < this.size; row++) {
+            for (int col = 0; col < this.size; col++) {
+                if (this.tiles[row][col] == 0) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     /**
@@ -139,38 +119,32 @@ public class Board implements Updatable, Testable {
     }
 
     /**
-     * Creates a Board with a variable size from 2x2 to 8x8.
+     * Creates a Board with a variable size from 2x2 to 15x15.
      *
      * @param size Number of rows and columns.
      */
     public Board(int size) {
-        this.size = (byte) size;
-        if (size < 2 || size > 8) {
-            throw new WrongBoardSizeException("Size of TicTacToe-Board must be in range 2 to 8");
+        if (size < 2 || size > MAX_BOARD_SIZE) {
+            throw new WrongBoardSizeException("Size of TicTacToe-Board must be in range 2 to " + MAX_BOARD_SIZE);
         }
+        this.size = (byte) size;
         this.currentTurn = true;
-        // this.size rows + this.size columns + 2 diagonals
-        this.bitMapPatterns = new long[this.size * 2 + 2];
-        initPatterns();
+        this.tiles = new byte[this.size][this.size];
 
     }
 
     /**
-     * Allowing for public access to the bitmap
+     * Creates a deep copy of a Board object.
      *
-     * @return bitmap form player one
+     * @param copy is the board to be copied.
      */
-    public long getBitMapPlayer1() {
-        return this.bitMapPlayer1;
-    }
-
-    /**
-     * Allowing for public access to the bitmap
-     *
-     * @return bitmap form player two
-     */
-    public long getBitMapPlayer2() {
-        return this.bitMapPlayer2;
+    public Board(Board copy) {
+        this.size = copy.size;
+        this.tiles = new byte[this.size][this.size];
+        for (int i = 0; i < this.size; i++) {
+            this.tiles[i] = Arrays.copyOf(copy.tiles[i], this.size);
+        }
+        this.currentTurn = copy.currentTurn;
     }
 
     /**
@@ -180,7 +154,7 @@ public class Board implements Updatable, Testable {
     void afterMove() {
         this.currentTurn = !this.currentTurn;
         int result = -1;
-        if (this.checkWin(this.currentTurn) || this.checkWin(!this.currentTurn)) {
+        if (this.checkWin()) {
             result = JOptionPane.showOptionDialog(null,
                     "Player " + (!this.currentTurn ? 'X' : 'O') + " has won the game!", "Game  Over",
                     JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, null,
@@ -205,13 +179,17 @@ public class Board implements Updatable, Testable {
 
     void reset() {
         this.currentTurn = true;
-        this.bitMapPlayer1 = 0;
-        this.bitMapPlayer2 = 0;
+        for (int row = 0; row < this.size; row++) {
+            for (int col = 0; col < this.size; col++) {
+                this.tiles[row][col] = 0;
+            }
+        }
     }
 
 
     /**
-     * Self-Explanatory: Reducing this object to a GameState
+     * Reducing this object to a GameState. GameState is a snapshot of the current game state. For easy and public
+     * access to all attributes without messing with the original one.
      */
     public GameState exportGameState() {
         return new GameState(this);
@@ -223,42 +201,55 @@ public class Board implements Updatable, Testable {
      *
      * @param tile is the corresponding number starting in the top left with zero and right left to
      *             right top to bottom:
-     *             +-+-+-+
-     *             |0|1|2|
-     *             +-+-+-+
-     *             |3|4|5|
-     *             +-+-+-+
-     *             |6|7|8|
-     *             +-+-+-+
+     *             +---+---+---+
+     *             | 0 | 1 | 2 |
+     *             +---+---+---+
+     *             | 3 | 4 | 5 |
+     *             +---+---+---+
+     *             | 6 | 7 | 8 |
+     *             +---+---+---+
      */
     void makeMove(int tile) {
+        if (tile >= size * size) {
+            throw new OutOfBounceException("Index: " + tile + " is not in bound for a board of size "
+                    + size + ". Argument must be in range 0 - " + (size * size - 1) + ".");
+        }
+        this.makeMove(tile / this.size, tile % this.size);
+    }
+
+    /**
+     * Tries to make a move on the board. Illegal placements like out of bounce and already occupies
+     * will throw an exception.
+     *
+     * @param row    Self Explanatory
+     * @param column Self Explanatory
+     *               +---+---+---+
+     *               |0,0|0,1|0,2|
+     *               +---+---+---+
+     *               |1,0|1,1|1,2|
+     *               +---+---+---+
+     *               |2,0|2,1|2,2|
+     *               +---+---+---+
+     */
+    void makeMove(int row, int column) {
         final byte sizeSquared = (byte) (this.size * this.size);
         // Throwing an exception if move is invalid.
-        if (tile < 0 || tile >= sizeSquared) {
-            throw new OutOfBounceException(tile + " is not in bound for a board of size "
-                    + this.size + ". Argument must be in range 0 - " + (sizeSquared - 1) + ".");
+        if (row < 0 || column < 0 || row >= this.size || column >= this.size) {
+            throw new OutOfBounceException("Row: " + row + " or column " + column + " is not in bound for a board of size "
+                    + this.size + ". Arguments must be in range 0 - " + (this.size - 1) + ", " + (this.size - 1) + ".");
         }
         // game over = no moves to make
         if (this.isGameOver()) {
             return;
         }
 
-        // Creating a bitmap with only one bit flipped to 1 at the index where the player wants to make a move.
-        final long placeMoveBitmap = 1L << ((sizeSquared - 1) - tile);
-        // Logical disjunction of both player bitmaps creates a bitmap of all non-empty tiles.
-        final long bitMapOccupied = this.bitMapPlayer1 | this.bitMapPlayer2;
-
         // Throwing an exception if move is invalid.
-        if ((placeMoveBitmap & bitMapOccupied) != 0) {
+        if (this.tiles[row][column] != 0) {
             throw new NonEmptyTileException("The chosen tile is already occupied. You hit an non empty tile");
         }
 
-        // Making the move by logical disjunction with correct bitmap
-        if (this.currentTurn) {
-            this.bitMapPlayer1 |= placeMoveBitmap;
-        } else {
-            this.bitMapPlayer2 |= placeMoveBitmap;
-        }
+        // Making the move by setting the right value in the tiles array
+        this.tiles[row][column] = (byte) (this.currentTurn ? 1 : -1);
     }
 
     /**
@@ -270,7 +261,7 @@ public class Board implements Updatable, Testable {
      * @return is the game over due to one of the prior reasons.
      */
     public boolean isGameOver() {
-        return this.checkWin(true) || this.checkWin(false) || this.checkFull();
+        return this.checkWin() || this.checkFull();
     }
 
     @Override
@@ -282,15 +273,19 @@ public class Board implements Updatable, Testable {
     public Object invokeMethod(FriendTestAccess fta) {
 
         switch (fta.getMethodName()) {
+            case "convertIndexToCoords":
+                return Board.convertIndexToCoords((int)fta.getArg(0), (byte) fta.getArg(1));
             case "makeMove":
-                if (fta.argsLength() == 1) {
-                    this.makeMove((int) fta.getArg(0));
-                } else {
-                    this.makeMove(Board.convertCoordsToIndex((int) fta.getArg(0), (int) fta.getArg(1), this.size));
+                if(fta.argsLength()== 1) {
+                    this.makeMove((int)fta.getArg(0));
+                }else {
+                    this.makeMove((int)fta.getArg(0),(int)fta.getArg(1));
                 }
-            break;
+                break;
             case "afterMove":
                 this.afterMove();
+                break;
+
         }
 
         return null;

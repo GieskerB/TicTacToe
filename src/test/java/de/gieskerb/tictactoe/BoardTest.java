@@ -2,10 +2,12 @@ package test.java.de.gieskerb.tictactoe;
 
 import main.java.de.gieskerb.tictactoe.exceptions.*;
 import main.java.de.gieskerb.tictactoe.model.Board;
+import main.java.de.gieskerb.tictactoe.util.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class BoardTest {
 
@@ -16,31 +18,66 @@ class BoardTest {
         board = new Board();
     }
 
-    @Test
-    void testServiceWithTile() {
 
-        board.invokeMethod(new FriendTestAccess("makeMove", 4));
-        assertFalse(board.isGameOver());
-        assertEquals(0b000010000, board.getBitMapPlayer1());
+    @Test
+    void testConvertIndexToCoordsCorrect() {
+        assertEquals(new Pair<>((byte)2,(byte)1), board.invokeMethod(new FriendTestAccess("convertIndexToCoords", 7,(byte)3)));
+    }
+    @Test
+    void testConvertIndexToCoordsFalse() {
+        assertNotEquals(new Pair<>((byte)1,(byte)0), board.invokeMethod(new FriendTestAccess("convertIndexToCoords", 8,(byte)3)));
+    }
+    @Test
+    void testConvertIndexToCoordsThrowsToSmall() {
+        assertThrows(OutOfBounceException.class,() -> board.invokeMethod(new FriendTestAccess("convertIndexToCoords", -2,(byte)3)));
+    }
+    @Test
+    void testConvertIndexToCoordsThrowsToBig() {
+        assertThrows(OutOfBounceException.class,() -> board.invokeMethod(new FriendTestAccess("convertIndexToCoords", 10,(byte)3)));
     }
 
     @Test
-    void testServiceWithRowAndCol() {
-
-        board.invokeMethod(new FriendTestAccess("makeMove", 1, 1));
-        assertFalse(board.isGameOver());
-        assertEquals(0b000010000, board.getBitMapPlayer1());
+    void testBoardConstructorThrowsToSmall() {
+        assertThrows(WrongBoardSizeException.class, () -> new Board(1));
     }
 
     @Test
-    void testServiceOutOfBounce() {
+    void testBoardConstructorThrowsToBig() {
+        assertThrows(WrongBoardSizeException.class, () -> new Board(120));
+    }
+
+    @Test
+    void testGameStateCreation() {
+        assertNotNull(this.board.exportGameState());
+    }
+
+    @Test
+    void testMakeMoveThrowsOutOfBounce1() {
         assertThrows(OutOfBounceException.class, () -> board.invokeMethod(new FriendTestAccess("makeMove", -1)));
+    }
+    @Test
+    void testMakeMoveThrowsOutOfBounce2() {
         assertThrows(OutOfBounceException.class, () -> board.invokeMethod(new FriendTestAccess("makeMove", 9)));
-        assertThrows(OutOfBounceException.class, () -> board.invokeMethod(new FriendTestAccess("makeMove", 10, 2)));
+   }
+    @Test
+    void testMakeMoveThrowsOutOfBounce3() {
+       assertThrows(OutOfBounceException.class, () -> board.invokeMethod(new FriendTestAccess("makeMove", 10, 2)));
+    }
+    @Test
+    void testMakeMoveThrowsOutOfBounce4() {
+        assertThrows(OutOfBounceException.class, () -> board.invokeMethod(new FriendTestAccess("makeMove", 0, 4)));
+    }
+    @Test
+    void testMakeMoveThrowsOutOfBounce5() {
+        assertThrows(OutOfBounceException.class, () -> board.invokeMethod(new FriendTestAccess("makeMove", -1, 1)));
+    }
+    @Test
+    void testMakeMoveThrowsOutOfBounce6() {
+        assertThrows(OutOfBounceException.class, () -> board.invokeMethod(new FriendTestAccess("makeMove", 0, -4)));
     }
 
     @Test
-    void testServiceNonEmptyTile() {
+    void testMakeMoveNonEmptyTile() {
         board.invokeMethod(new FriendTestAccess("makeMove", 1, 1));
         assertThrows(NonEmptyTileException.class, () -> board.invokeMethod(new FriendTestAccess("makeMove", 1, 1)));
     }
@@ -53,7 +90,8 @@ class BoardTest {
         board.invokeMethod(new FriendTestAccess("makeMove", 4));
         board.invokeMethod(new FriendTestAccess("afterMove"));
         assertFalse(board.isGameOver());
-        assertEquals(0b000010000, board.getBitMapPlayer2());
+        //TODO
+
     }
 
     @Test
@@ -92,12 +130,6 @@ class BoardTest {
         assertTrue(board.isGameOver());
     }
 
-    @Test
-    void testCustomConstructorWithInvalidSize() {
-        assertThrows(WrongBoardSizeException.class, () -> new Board(9));
-        assertThrows(WrongBoardSizeException.class, () -> new Board(1));
-        assertThrows(WrongBoardSizeException.class, () -> new Board(-2));
-    }
 
     /*
     @Test

@@ -1,5 +1,7 @@
 package main.java.de.gieskerb.tictactoe.model;
 
+import java.util.Arrays;
+
 /**
  * GameState is a simple container for the two Bitmaps of both players.
  * Primarily used for simply exporting only the GameState with only the most important Methods.
@@ -14,12 +16,14 @@ public class GameState {
     /**
      * Values are copied straight from the board object
      */
-    public final long bitMapPlayer1,bitMapPlayer2;
+    public final byte[][] tiles;
 
     GameState(Board board) {
         this.size = board.size;
-        this.bitMapPlayer1 = board.getBitMapPlayer1();
-        this.bitMapPlayer2 = board.getBitMapPlayer2();
+        this.tiles = new byte[this.size][this.size];
+        for (int i = 0; i < this.size; i++) {
+            this.tiles[i] = Arrays.copyOf(board.tiles[i], this.size);
+        }
     }
 
     /*
@@ -41,9 +45,10 @@ public class GameState {
 
     /**
      * Converting a number from base10 into a base64 stored in a String.
+     *
      * @param stringBuilder For better performance to base64 is constructed in a StringBuilder.
-     * @param number Number that will be converted.
-     * @param size The Size of the board is necessary to know to determine the length of the key. May need to add zeros.
+     * @param number        Number that will be converted.
+     * @param size          The Size of the board is necessary to know to determine the length of the key. May need to add zeros.
      */
     private static void longBase10toStringBase64(StringBuilder stringBuilder, long number, byte size) {
         while (number > 0) {
@@ -51,7 +56,7 @@ public class GameState {
             stringBuilder.append(BASE64[index]);
             number /= 64;
         }
-        while (stringBuilder.length() < keyLengthByBoardSize[size-2]) {
+        while (stringBuilder.length() < keyLengthByBoardSize[size - 2]) {
             stringBuilder.append('0');
         }
 
@@ -59,6 +64,7 @@ public class GameState {
 
     /**
      * Upon calling this method, the current GameState will be converted into a perfectly indefinably Key / ID.
+     *
      * @param gameState Since this is a static Method, the GameState must be provided by argument.
      * @return Key as a String.
      */
@@ -68,8 +74,8 @@ public class GameState {
 
         // Constructing the Key back to front. Because of that, we only need to use StringBuild.append() and not
         // StringBuilder.insert(). -> Better performance again.
-        longBase10toStringBase64(stringBuilder, gameState.bitMapPlayer2, gameState.size);
-        longBase10toStringBase64(stringBuilder, gameState.bitMapPlayer1, gameState.size);
+        //longBase10toStringBase64(stringBuilder, gameState.bitMapPlayer2, gameState.size);
+        //longBase10toStringBase64(stringBuilder, gameState.bitMapPlayer1, gameState.size);
 
         // Reversing the String because it was build back to front.
         return stringBuilder.reverse().toString();

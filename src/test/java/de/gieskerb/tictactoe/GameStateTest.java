@@ -28,15 +28,7 @@ class GameStateTest {
         this.gs = board.exportGameState();
     }
 
-    @Test
-    void testCorrectBitMapP1() {
-        assertEquals(0b101000000, this.gs.bitMapPlayer1);
-    }
-
-    @Test
-    void testCorrectBitMapP2() {
-        assertEquals(0b000010001, this.gs.bitMapPlayer2);
-    }
+    //TODO
 
     @Test
     void testKey() {

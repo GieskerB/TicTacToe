@@ -53,6 +53,10 @@ public class Game extends Updater {
         return this.round;
     }
 
+    public Board getBoard() {
+        return new Board(board);
+    }
+
     public void newGame() {
         // Default TicTacToeSize
         this.newGame(3);
@@ -118,9 +122,13 @@ public class Game extends Updater {
                     throw new WrongArgSizeException("The expected number of args from a controller is one or two.");
                 }
 
-                final int tileIndex = args.length == 1 ? args[0] : Board.convertCoordsToIndex(args[0], args[1], this.size);
-                this.board.makeMove(tileIndex);
-                super.fireUpdate(tileIndex, (this.round % 2 == 1 ? 0 : 1));
+                if (args.length == 1) {
+                    this.board.makeMove(args[0]);
+                    super.fireUpdate(args[0], (this.round % 2 == 1 ? 0 : 1));
+                } else {
+                    this.board.makeMove(args[0], args[1]);
+                    super.fireUpdate(args[0] * this.board.size, args[1] + this.board.size, (this.round % 2 == 1 ? 0 : 1));
+                }
                 this.board.afterMove();
                 break;
 

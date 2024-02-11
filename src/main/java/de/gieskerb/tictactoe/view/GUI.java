@@ -80,6 +80,10 @@ public class GUI extends Visual {
 
     @Override
     public void update(Object... obj) {
+        for(Object object: obj) {
+            System.out.print((int) object + " ");
+        }
+        System.out.println();
         if (obj.length == 1) {
             for(var b: this.tiles) {
                 b.setText("");

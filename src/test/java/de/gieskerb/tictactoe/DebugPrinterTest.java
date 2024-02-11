@@ -11,7 +11,6 @@ import java.io.PrintStream;
 import static org.junit.jupiter.api.Assertions.*;
 
 class DebugPrinterTest {
-
     private DebugPrinter dp;
 
     private final static ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -34,25 +33,12 @@ class DebugPrinterTest {
     }
 
     @Test
-    void testPrintPatters() {
-        dp.printPatterns();
-        String rowPatterns = "00\n11\n\n11\n00\n\n";
-        String colPatterns = "01\n01\n\n10\n10\n\n";
-        String digPatterns = "10\n01\n\n01\n10\n\n";
+    void testPrintBoard() {
+        String expectedResult = "" + DebugPrinter.PLAYER2 + DebugPrinter.PLAYER1 + "\r\n" + DebugPrinter.PLAYER1 + DebugPrinter.EMPTY +  "\r\n" ;
+       //String expectedResult = "OX\nX_\n";
+        dp.printBoard();
 
-        assertEquals(rowPatterns + colPatterns + digPatterns, out.toString());
-    }
-
-    @Test
-    void testPrintBitMapP1() {
-        dp.printBitMapP1();
-        assertEquals("01\n10\n\n", out.toString());
-    }
-
-    @Test
-    void testPrintBitMapP2() {
-        dp.printBitMapP2();
-        assertEquals("10\n00\n\n", out.toString());
+        assertEquals(expectedResult, out.toString());
     }
 
     @AfterEach
