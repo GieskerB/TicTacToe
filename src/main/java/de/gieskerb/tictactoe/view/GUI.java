@@ -7,6 +7,7 @@ import main.java.de.gieskerb.tictactoe.player.Player;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Arrays;
 
 public class GUI extends Visual {
 
@@ -25,7 +26,7 @@ public class GUI extends Visual {
     /**
      * Creates a simple JFrame UI with a tic-tac-toe board being displayed. Number of rows and
      * columns are determent by the boardSize.
-     * @param updater This implementation uses the MVC concept for updating each action. Therefore the Model
+     * @param updater This implementation uses the MVC concept for updating each action. Therefore, the Model
      *               (Updater) is required here.
      * @param pixelSize Literal visual size of the board.
      * @param boardSize number of row and column of the board.
@@ -55,7 +56,6 @@ public class GUI extends Visual {
             this.tiles[i].setBackground(new Color (69,69,69));
             this.tiles[i].setForeground(new Color (255,127,15));
             this.tiles[i].setFont(new Font("Tahoma", Font.BOLD, 69));
-            // this.tiles[i].addMouseListener(new MouseClick(super.updater, i));
             background.add(this.tiles[i]);
         }
 
@@ -80,16 +80,13 @@ public class GUI extends Visual {
 
     @Override
     public void update(Object... obj) {
-        for(Object object: obj) {
-            System.out.print((int) object + " ");
-        }
-        System.out.println();
+
         if (obj.length == 1) {
             for(var b: this.tiles) {
                 b.setText("");
             }
         } else {
-            this.tiles[(int)obj[0]].setText( (int)obj[1] == 1 ? "X": "O");
+            this.tiles[(int)obj[0]].setText( (boolean) obj[1]  ? "X": "O");
         }
     }
 }

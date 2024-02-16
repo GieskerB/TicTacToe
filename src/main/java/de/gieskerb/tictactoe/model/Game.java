@@ -8,7 +8,7 @@ import main.java.de.gieskerb.tictactoe.view.Console;
 import main.java.de.gieskerb.tictactoe.view.GUI;
 import main.java.de.gieskerb.tictactoe.view.Visual;
 
-public class Game extends Updater {
+public class Game implements Updatable {
 
     private Visual visual;
 
@@ -18,7 +18,6 @@ public class Game extends Updater {
 
     private byte size;
 
-    private byte round;
 
     public Game() {
         this(new Human(true));
@@ -38,19 +37,12 @@ public class Game extends Updater {
 
     public Game(Player p1, Player p2) {
         this.player1 = p1;
-        this.player1.setGamePointer(this);
         this.player2 = p2;
-        this.player2.setGamePointer(this);
 
         this.size = 0;
-        this.round = 0;
         this.board = null;
         this.visual = null;
 
-    }
-
-    public int getRound() {
-        return this.round;
     }
 
     public Board getBoard() {
@@ -65,7 +57,7 @@ public class Game extends Updater {
 
     public void newGame(int size) {
         this.changeSize(size);
-        this.board = new Board(this.size);
+        this.board = new Board(this.size,this);
         this.reset();
     }
 
@@ -87,57 +79,62 @@ public class Game extends Updater {
     }
 
     public Player changePlayer1To(Player newPlayer) {
-        var temp = this.player1;
+        var oldPlayer = this.player1;
         this.player1 = newPlayer;
-        return temp;
+        return oldPlayer;
     }
 
     public Player changePlayer2To(Player newPlayer) {
-        var temp = this.player2;
+        var oldPlayer = this.player2;
         this.player2 = newPlayer;
-        return temp;
+        return oldPlayer;
     }
 
     public void showConsole() {
-        this.visual = new Console(this, this.size);
+        this.visual = new Console(this.board, this.size);
     }
 
     public void showGUI() {
-        this.visual = new GUI(this, 690, this.size);
+        this.visual = new GUI(this.board, 690, this.size);
     }
 
     public void reset() {
         this.board.reset();
-        super.fireUpdate(-1);
     }
 
 
     @Override
-    public void service(Origin origin, int... args) {
-        final int ARG_SIZE = args.length;
-        switch (origin) {
-            case CONTROLLER:
-            case COMPUTER:
-                if (ARG_SIZE != 1 && ARG_SIZE != 2) {
-                    throw new WrongArgSizeException("The expected number of args from a controller is one or two.");
-                }
-
-                if (args.length == 1) {
-                    this.board.makeMove(args[0]);
-                    super.fireUpdate(args[0], (this.round % 2 == 1 ? 0 : 1));
-                } else {
-                    this.board.makeMove(args[0], args[1]);
-                    super.fireUpdate(args[0] * this.board.size, args[1] + this.board.size, (this.round % 2 == 1 ? 0 : 1));
-                }
-                this.board.afterMove();
-                break;
-
-
+    public void update(Object... obj) {
+        if((int)obj[0] == -1) {
+            if(!this.player1.isMyTurn());
+            this.switchTurns();
         }
-
-        round++;
-        player1.switchTurn();
-        player2.switchTurn();
     }
 
+    public void switchTurns() {
+        this.player1.switchTurn();
+        this.player2.switchTurn();
+    }
+
+    public void askForNextMove() {
+        int nextMove;
+        if (this.player1.isMyTurn()) {
+            nextMove = this.player1.getMove(this.board.exportGameState());
+        } else {
+            nextMove = this.player2.getMove(this.board.exportGameState());
+        }
+
+        if(nextMove != -1) {
+            new Thread(() -> {
+                try {
+                    Thread.sleep(250);
+                    board.service(Origin.COMPUTER, nextMove);
+                } catch (InterruptedException ignored) {
+
+                }
+
+            }).start();
+
+        }
+    }
 }

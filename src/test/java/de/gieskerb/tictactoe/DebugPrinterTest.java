@@ -23,7 +23,7 @@ class DebugPrinterTest {
 
     @BeforeEach
     void setUp() {
-        Board board = new Board(2);
+        Board board = new Board(2, null);
         board.invokeMethod(new FriendTestAccess("makeMove", 1));
         board.invokeMethod(new FriendTestAccess("afterMove"));
         board.invokeMethod(new FriendTestAccess("makeMove", 0));

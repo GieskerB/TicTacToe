@@ -1,6 +1,8 @@
 package main.java.de.gieskerb.tictactoe.model;
 
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * GameState is a simple container for the two Bitmaps of both players.
@@ -24,6 +26,21 @@ public class GameState {
         for (int i = 0; i < this.size; i++) {
             this.tiles[i] = Arrays.copyOf(board.tiles[i], this.size);
         }
+    }
+
+    public int[] getAvailableTiles() {
+        int[] enoughSpace  = new int[this.size * this.size];
+        int index = 0;
+        for( int row = 0; row <this.size; row++) {
+            for( int col = 0; col <this.size; col++) {
+                if(this.tiles[row][col] == 0) {
+                    enoughSpace[index++] = row * this.size + col;
+                }
+            }
+        }
+        int[] returnArray = new int[index];
+        System.arraycopy(enoughSpace, 0, returnArray, 0, index);
+        return returnArray;
     }
 
     /*

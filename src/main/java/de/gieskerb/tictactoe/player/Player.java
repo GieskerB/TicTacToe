@@ -6,9 +6,8 @@ import main.java.de.gieskerb.tictactoe.model.Game;
 
 import java.awt.event.MouseAdapter;
 
-public abstract class Player  implements TicTacToePlayable {
+public abstract class Player implements TicTacToePlayable {
 
-    Game gamePointer;
 
     final String name;
 
@@ -26,13 +25,8 @@ public abstract class Player  implements TicTacToePlayable {
         this.name = name;
         this.isPlayerOne = isPlayerOne;
         this.isMyTurn = this.isPlayerOne;
-        this.gamePointer = null;
         this.score = new short[3];
 
-    }
-
-    public void setGamePointer (Game gamePointer) {
-        this.gamePointer = gamePointer;
     }
 
     public void notifyGameResult(GameResult gr) {
@@ -62,17 +56,12 @@ public abstract class Player  implements TicTacToePlayable {
     }
 
     @Override
-    public byte getMove(GameState gameState) {
-        return 0;
-    }
-
-    abstract void myTurn();
-
-    @Override
     public void switchTurn() {
         this.isMyTurn = !this.isMyTurn;
-        if (this.isMyTurn) {
-            this.myTurn();
-        }
     }
+
+    public boolean isMyTurn() {
+        return this.isMyTurn;
+    }
+
 }

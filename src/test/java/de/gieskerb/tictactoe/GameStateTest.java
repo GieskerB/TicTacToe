@@ -1,8 +1,6 @@
 package test.java.de.gieskerb.tictactoe;
 
-import main.java.de.gieskerb.tictactoe.model.Board;
-import main.java.de.gieskerb.tictactoe.model.GameState;
-import main.java.de.gieskerb.tictactoe.model.Origin;
+import main.java.de.gieskerb.tictactoe.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -16,7 +14,7 @@ class GameStateTest {
     @BeforeEach
     void setUp() {
         // Board is subclass of GameState. Need this class to edit the GameState correctly
-        Board board = new Board();
+        Board board = new Board((Game) null);
         board.invokeMethod(new FriendTestAccess("makeMove",2));
         board.invokeMethod(new FriendTestAccess("afterMove"));
         board.invokeMethod(new FriendTestAccess("makeMove",4));

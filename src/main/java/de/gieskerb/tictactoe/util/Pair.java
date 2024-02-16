@@ -1,7 +1,5 @@
 package main.java.de.gieskerb.tictactoe.util;
 
-import main.java.de.gieskerb.tictactoe.model.Board;
-
 public class Pair<T1, T2> {
 
     public T1 first;

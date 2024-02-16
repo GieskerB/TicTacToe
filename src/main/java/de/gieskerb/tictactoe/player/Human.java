@@ -1,5 +1,7 @@
 package main.java.de.gieskerb.tictactoe.player;
 
+import main.java.de.gieskerb.tictactoe.model.GameState;
+
 public class Human extends Player {
 
     private static byte unnamedPlayerCount = 0;
@@ -12,8 +14,9 @@ public class Human extends Player {
         super(name, isPlayerOne);
     }
 
+
     @Override
-    void myTurn() {
-        // Wait for Player Input via mouse or console
+    public int getMove(GameState gameState) {
+        return -1;
     }
 }

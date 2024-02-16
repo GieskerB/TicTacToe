@@ -16,7 +16,9 @@ import java.util.Arrays;
  * Checking for correctness.
  * Win detection
  */
-public class Board implements Updatable, Testable {
+public class Board extends Updater implements Testable {
+
+    final Game gamePointer;
 
     /**
      * Even though the game should be scalable the size will be caped at a specific value. This one is set based on
@@ -61,7 +63,7 @@ public class Board implements Updatable, Testable {
      * @return Pair of coordinates: row and column based on index.
      */
     static Pair<Byte, Byte> convertIndexToCoords(int index, byte size) {
-        if(index < 0 || index >= size*size) {
+        if (index < 0 || index >= size * size) {
             throw new OutOfBounceException("Index: " + index + " does not match with board of size "
                     + size + "x" + size + "!");
         }
@@ -113,9 +115,9 @@ public class Board implements Updatable, Testable {
     /**
      * Creates a Board with a default size of 3x3.
      */
-    public Board() {
+    public Board(Game gamePointer) {
         //Default size for a tic tac toe game
-        this(3);
+        this(3, gamePointer);
     }
 
     /**
@@ -123,9 +125,13 @@ public class Board implements Updatable, Testable {
      *
      * @param size Number of rows and columns.
      */
-    public Board(int size) {
+    public Board(int size, Game gamePointer) {
         if (size < 2 || size > MAX_BOARD_SIZE) {
             throw new WrongBoardSizeException("Size of TicTacToe-Board must be in range 2 to " + MAX_BOARD_SIZE);
+        }
+        this.gamePointer = gamePointer;
+        if (this.gamePointer != null) {
+            this.attach(gamePointer);
         }
         this.size = (byte) size;
         this.currentTurn = true;
@@ -139,6 +145,7 @@ public class Board implements Updatable, Testable {
      * @param copy is the board to be copied.
      */
     public Board(Board copy) {
+        this.gamePointer = copy.gamePointer;
         this.size = copy.size;
         this.tiles = new byte[this.size][this.size];
         for (int i = 0; i < this.size; i++) {
@@ -151,30 +158,21 @@ public class Board implements Updatable, Testable {
      * Everything need to be done after a players move to perpare for the next one.
      * 1. Change which player is currently playing
      */
-    void afterMove() {
+    byte afterMove() {
         this.currentTurn = !this.currentTurn;
-        int result = -1;
+        byte result = -1;
         if (this.checkWin()) {
-            result = JOptionPane.showOptionDialog(null,
+            result = (byte) JOptionPane.showOptionDialog(null,
                     "Player " + (!this.currentTurn ? 'X' : 'O') + " has won the game!", "Game  Over",
                     JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, null,
                     new String[]{"Rematch", "Quit"}, "Rematch");
         } else if (this.checkFull()) {
-            result = JOptionPane.showOptionDialog(null, "Game has ended in a Tie!", "Game  Over",
+            result = (byte) JOptionPane.showOptionDialog(null, "Game has ended in a Tie!", "Game  Over",
                     JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, null,
                     new String[]{"Rematch", "Quit"}, "Rematch");
         }
-        switch (result) {
-            case -1:
-                // Game continues
-                break;
-            case 0:
-                this.reset();
-                break;
-            case 1:
-                System.exit(0);
-                break;
-        }
+
+        return result;
     }
 
     void reset() {
@@ -264,8 +262,38 @@ public class Board implements Updatable, Testable {
         return this.checkWin() || this.checkFull();
     }
 
+
     @Override
-    public void update(Object... obj) {
+    protected void serviced(Origin origin, int... args) {
+        byte result = -1;
+        switch (origin) {
+            case CONTROLLER:
+                assert (args.length == 2);
+                this.makeMove(args[0], args[1]);
+                super.fireUpdate(args[0] * this.size + args[1], this.currentTurn);
+                result = this.afterMove();
+                break;
+            case COMPUTER:
+                assert (args.length == 1);
+                this.makeMove(args[0]);
+                super.fireUpdate(args[0], this.currentTurn);
+                result = this.afterMove();
+                break;
+            default:
+                // Unknown do nothing so far
+
+        }
+
+        if(result == -1) {
+            this.gamePointer.switchTurns();
+
+            this.gamePointer.askForNextMove();
+        } else if(result == 0) {
+            this.reset();
+            super.fireUpdate(-1);
+        } else {
+            System.exit(0);
+        }
 
     }
 
@@ -274,21 +302,43 @@ public class Board implements Updatable, Testable {
 
         switch (fta.getMethodName()) {
             case "convertIndexToCoords":
-                return Board.convertIndexToCoords((int)fta.getArg(0), (byte) fta.getArg(1));
+                return Board.convertIndexToCoords((int) fta.getArg(0), (byte) fta.getArg(1));
             case "makeMove":
-                if(fta.argsLength()== 1) {
-                    this.makeMove((int)fta.getArg(0));
-                }else {
-                    this.makeMove((int)fta.getArg(0),(int)fta.getArg(1));
+                if (fta.argsLength() == 1) {
+                    this.makeMove((int) fta.getArg(0));
+                } else {
+                    this.makeMove((int) fta.getArg(0), (int) fta.getArg(1));
                 }
                 break;
             case "afterMove":
                 this.afterMove();
+                break;
+            case "reset":
+                this.reset();
                 break;
 
         }
 
         return null;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+
+        if (!(obj instanceof Board board)) {
+            return false;
+        }
+
+        if (board.size != this.size) {
+            return false;
+        }
+
+        if (board.currentTurn != this.currentTurn) {
+            return false;
+        }
+
+        return Arrays.deepEquals(board.tiles, this.tiles);
+    }
+
 }
 

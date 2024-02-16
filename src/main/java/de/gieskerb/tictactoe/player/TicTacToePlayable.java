@@ -4,9 +4,9 @@ import main.java.de.gieskerb.tictactoe.model.GameState;
 
 public interface TicTacToePlayable {
 
-    byte getMove(GameState gameState);
+    int getMove(GameState gameState);
 
+    void switchTurn();
 
-    public void switchTurn() ;
-
+    boolean isMyTurn();
 }
