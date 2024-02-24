@@ -1,7 +1,6 @@
 package main.java.de.gieskerb.tictactoe.model;
 
 import main.java.de.gieskerb.tictactoe.exceptions.NotAllowedActionException;
-import main.java.de.gieskerb.tictactoe.exceptions.WrongArgSizeException;
 import main.java.de.gieskerb.tictactoe.player.Human;
 import main.java.de.gieskerb.tictactoe.player.Player;
 import main.java.de.gieskerb.tictactoe.view.Console;
@@ -99,16 +98,23 @@ public class Game implements Updatable {
     }
 
     public void reset() {
+        if(!this.player1.isMyTurn()) {
+            this.switchTurns();
+        }
         this.board.reset();
+        this.start();
     }
 
 
     @Override
     public void update(Object... obj) {
         if((int)obj[0] == -1) {
-            if(!this.player1.isMyTurn());
-            this.switchTurns();
+            this.reset();
         }
+    }
+
+    public void start() {
+        this.askForNextMove();
     }
 
     public void switchTurns() {

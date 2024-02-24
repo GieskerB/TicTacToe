@@ -37,7 +37,7 @@ public class GUI extends Visual {
 
         super(updater, boardSize);
 
-        final byte BOARD_SIZE_SQUARED = (byte) (super.boardSize * super.boardSize);
+        final short BOARD_SIZE_SQUARED = (short) (super.boardSize * super.boardSize);
         // background is a container which holds all the tiles.
         JPanel background = new JPanel();
         background.setBackground(new Color (16,16,16));
@@ -48,14 +48,15 @@ public class GUI extends Visual {
 
         // Setting up each tile form the board with some extra visual benefits like color and font.
         this.tiles = new JLabel[BOARD_SIZE_SQUARED];
-        for(byte i = 0; i< BOARD_SIZE_SQUARED; i++) {
+        int fontSize = pixelSize / super.boardSize;
+        for(short i = 0; i< BOARD_SIZE_SQUARED; i++) {
             this.tiles[i] = new JLabel();
             this.tiles[i].setFocusable(false);
             this.tiles[i].setOpaque(true);
             this.tiles[i].setHorizontalAlignment(JLabel.CENTER);
             this.tiles[i].setBackground(new Color (69,69,69));
             this.tiles[i].setForeground(new Color (255,127,15));
-            this.tiles[i].setFont(new Font("Tahoma", Font.BOLD, 69));
+            this.tiles[i].setFont(new Font("Tahoma", Font.BOLD, fontSize));
             background.add(this.tiles[i]);
         }
 

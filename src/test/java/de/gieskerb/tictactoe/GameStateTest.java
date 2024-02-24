@@ -9,11 +9,11 @@ import static org.junit.jupiter.api.Assertions.*;
 class GameStateTest {
 
 
-    private GameState gs;
 
-    @BeforeEach
-    void setUp() {
-        // Board is subclass of GameState. Need this class to edit the GameState correctly
+    //TODO
+
+    @Test
+    void testLegalMoves() {
         Board board = new Board((Game) null);
         board.invokeMethod(new FriendTestAccess("makeMove",2));
         board.invokeMethod(new FriendTestAccess("afterMove"));
@@ -23,19 +23,25 @@ class GameStateTest {
         board.invokeMethod(new FriendTestAccess("afterMove"));
         board.invokeMethod(new FriendTestAccess("makeMove",8));
         board.invokeMethod(new FriendTestAccess("afterMove"));
-        this.gs = board.exportGameState();
+
+        assertArrayEquals(new int[]{1,3,5,6,7},board.exportGameState().getLegalMoves());
     }
 
-    //TODO
+    /*
+     * Since the is no  standard base81 number to compare to from the internet I'll just hope,
+     * that each number is unique. :-)
+     */
 
     @Test
-    void testKey() {
-        /*
-         * Sadly my way of creating a base64 number is different from the standard. Because of that
-         * an asserting with a literature value or similar is impossible. For test coverage I will
-         * do a useless assertion.
-         */
-        assertEquals(GameState.getKey(this.gs), GameState.getKey(this.gs)) ;
+    void testKeySize2() {
+        GameState gs = new Board(2, null).exportGameState();
+        assertEquals(GameState.getKey(gs), GameState.getKey(gs)) ;
+    }
+
+    @Test
+    void testKeySize3() {
+        GameState gs = new Board(3, null).exportGameState();
+        assertEquals(GameState.getKey(gs), GameState.getKey(gs)) ;
     }
 
 }

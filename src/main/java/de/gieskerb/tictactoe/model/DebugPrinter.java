@@ -14,9 +14,9 @@ public class DebugPrinter {
 
     public void printBoard() {
         GameState gs = this.boardPointer.exportGameState();
-        for (int row = 0; row < this.boardPointer.size; row++) {
-            for (int col = 0; col < this.boardPointer.size; col++) {
-                switch (gs.tiles[row][col]) {
+        for (int row = 0; row < gs.size; row++) {
+            for (int col = 0; col < gs.size; col++) {
+                switch (gs.tiles[row* gs.size + col]) {
                     case 1:
                         System.out.print(PLAYER1);
                         break;

@@ -36,6 +36,10 @@ public abstract class Updater {
         }
     }
 
+    public final int getNumberAttached() {
+        return this.updatableList.size();
+    }
+
     protected abstract void serviced(Origin origin, int... args);
 
     public final void service(Origin origin, int... args) {

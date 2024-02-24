@@ -1,6 +1,5 @@
 package main.java.de.gieskerb.tictactoe.model;
 
-import main.java.de.gieskerb.tictactoe.exceptions.NonEmptyTileException;
 import main.java.de.gieskerb.tictactoe.exceptions.OutOfBounceException;
 import main.java.de.gieskerb.tictactoe.exceptions.WrongBoardSizeException;
 import main.java.de.gieskerb.tictactoe.util.Pair;
@@ -8,7 +7,6 @@ import test.java.de.gieskerb.tictactoe.FriendTestAccess;
 import test.java.de.gieskerb.tictactoe.Testable;
 
 import javax.swing.*;
-import java.util.Arrays;
 
 /**
  * Board handles the game logic:
@@ -26,23 +24,7 @@ public class Board extends Updater implements Testable {
      */
     final static byte MAX_BOARD_SIZE = 15;
 
-    /**
-     * number of rows and columns of the board.
-     */
-    final byte size;
-
-    /**
-     * Two-dimensional array storing all the information about the board.
-     * +1: Player 1
-     * -1: Player 2
-     * 0: Empty
-     */
-    byte[][] tiles;
-
-    /**
-     * True means it's players one turn, false says its players two turn.
-     */
-    private boolean currentTurn;
+    private final GameState gameState;
 
 
     /**
@@ -71,48 +53,6 @@ public class Board extends Updater implements Testable {
     }
 
     /**
-     * Checking for a win. Adding all values for each row, column and diagonal and compareing it to
-     * the size of the board will tell if a player has won the game.
-     *
-     * @return If the current gamest ate is a win or not!
-     */
-    private boolean checkWin() {
-        byte diagonalTLBRSum = 0, diagonalTRBLSum = 0;
-        for (int i = 0; i < this.size; i++) {
-            byte rowSum = 0, colSum = 0;
-            for (int j = 0; j < this.size; j++) {
-                // Adding the values: Once for each row and once for each column.
-                rowSum += this.tiles[j][i];
-                colSum += this.tiles[i][j];
-            }
-            // If the sum equals the size of the board the row or column is filled. Therefor the game is won.
-            if (Math.abs(rowSum) == this.size || Math.abs(colSum) == this.size) {
-                return true;
-            }
-            // Also adding up the diagonales.
-            diagonalTLBRSum += this.tiles[i][i];
-            diagonalTRBLSum += this.tiles[this.size - i - 1][i];
-        }
-        // Simplified expression: If diagonal is filled: game is won. Otherwise, it isn't.
-        return Math.abs(diagonalTLBRSum) == this.size || Math.abs(diagonalTRBLSum) == this.size;
-    }
-
-
-    /**
-     * @return Is every tile on the board filled?
-     */
-    private boolean checkFull() {
-        for (int row = 0; row < this.size; row++) {
-            for (int col = 0; col < this.size; col++) {
-                if (this.tiles[row][col] == 0) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    /**
      * Creates a Board with a default size of 3x3.
      */
     public Board(Game gamePointer) {
@@ -133,9 +73,7 @@ public class Board extends Updater implements Testable {
         if (this.gamePointer != null) {
             this.attach(gamePointer);
         }
-        this.size = (byte) size;
-        this.currentTurn = true;
-        this.tiles = new byte[this.size][this.size];
+        this.gameState = new GameState((byte) size);
 
     }
 
@@ -146,12 +84,7 @@ public class Board extends Updater implements Testable {
      */
     public Board(Board copy) {
         this.gamePointer = copy.gamePointer;
-        this.size = copy.size;
-        this.tiles = new byte[this.size][this.size];
-        for (int i = 0; i < this.size; i++) {
-            this.tiles[i] = Arrays.copyOf(copy.tiles[i], this.size);
-        }
-        this.currentTurn = copy.currentTurn;
+        this.gameState = new GameState(copy.gameState);
     }
 
     /**
@@ -159,14 +92,13 @@ public class Board extends Updater implements Testable {
      * 1. Change which player is currently playing
      */
     byte afterMove() {
-        this.currentTurn = !this.currentTurn;
         byte result = -1;
-        if (this.checkWin()) {
+        if (this.gameState.checkWin()) {
             result = (byte) JOptionPane.showOptionDialog(null,
-                    "Player " + (!this.currentTurn ? 'X' : 'O') + " has won the game!", "Game  Over",
+                    "Player " + (!this.gameState.playerOne ? 'X' : 'O') + " has won the game!", "Game  Over",
                     JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, null,
                     new String[]{"Rematch", "Quit"}, "Rematch");
-        } else if (this.checkFull()) {
+        } else if (this.gameState.checkFull()) {
             result = (byte) JOptionPane.showOptionDialog(null, "Game has ended in a Tie!", "Game  Over",
                     JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, null,
                     new String[]{"Rematch", "Quit"}, "Rematch");
@@ -176,12 +108,7 @@ public class Board extends Updater implements Testable {
     }
 
     void reset() {
-        this.currentTurn = true;
-        for (int row = 0; row < this.size; row++) {
-            for (int col = 0; col < this.size; col++) {
-                this.tiles[row][col] = 0;
-            }
-        }
+        this.gameState.reset();
     }
 
 
@@ -190,7 +117,7 @@ public class Board extends Updater implements Testable {
      * access to all attributes without messing with the original one.
      */
     public GameState exportGameState() {
-        return new GameState(this);
+        return new GameState(this.gameState);
     }
 
     /**
@@ -208,11 +135,12 @@ public class Board extends Updater implements Testable {
      *             +---+---+---+
      */
     void makeMove(int tile) {
-        if (tile >= size * size) {
+        // Throwing an exception if move is invalid.
+        if (tile >= this.gameState.sizeSquared || tile < 0) {
             throw new OutOfBounceException("Index: " + tile + " is not in bound for a board of size "
-                    + size + ". Argument must be in range 0 - " + (size * size - 1) + ".");
+                    + this.gameState.size + ". Argument must be in range 0 - " + (this.gameState.sizeSquared - 1) + ".");
         }
-        this.makeMove(tile / this.size, tile % this.size);
+        this.gameState.makeMove(tile);
     }
 
     /**
@@ -230,38 +158,14 @@ public class Board extends Updater implements Testable {
      *               +---+---+---+
      */
     void makeMove(int row, int column) {
-        final byte sizeSquared = (byte) (this.size * this.size);
         // Throwing an exception if move is invalid.
-        if (row < 0 || column < 0 || row >= this.size || column >= this.size) {
+        if (row < 0 || column < 0 || row >= this.gameState.size || column >= this.gameState.size) {
             throw new OutOfBounceException("Row: " + row + " or column " + column + " is not in bound for a board of size "
-                    + this.size + ". Arguments must be in range 0 - " + (this.size - 1) + ", " + (this.size - 1) + ".");
+                    + this.gameState.size + ". Arguments must be in range 0 - " + (this.gameState.size - 1) + ", "
+                    + (this.gameState.size - 1) + ".");
         }
-        // game over = no moves to make
-        if (this.isGameOver()) {
-            return;
-        }
-
-        // Throwing an exception if move is invalid.
-        if (this.tiles[row][column] != 0) {
-            throw new NonEmptyTileException("The chosen tile is already occupied. You hit an non empty tile");
-        }
-
-        // Making the move by setting the right value in the tiles array
-        this.tiles[row][column] = (byte) (this.currentTurn ? 1 : -1);
+        this.makeMove(row * this.gameState.size + column);
     }
-
-    /**
-     * There are three reasons why the game ends:
-     * 1. Player 1 has won the game.
-     * 2. Player 2 has won the game.
-     * 3. No one has won the game. Its draw.
-     *
-     * @return is the game over due to one of the prior reasons.
-     */
-    public boolean isGameOver() {
-        return this.checkWin() || this.checkFull();
-    }
-
 
     @Override
     protected void serviced(Origin origin, int... args) {
@@ -269,14 +173,20 @@ public class Board extends Updater implements Testable {
         switch (origin) {
             case CONTROLLER:
                 assert (args.length == 2);
+                if (this.gameState.isGameOver()) {
+                    return;
+                }
                 this.makeMove(args[0], args[1]);
-                super.fireUpdate(args[0] * this.size + args[1], this.currentTurn);
+                super.fireUpdate(args[0] * this.gameState.size + args[1], !this.gameState.playerOne);
                 result = this.afterMove();
                 break;
             case COMPUTER:
+                if (this.gameState.isGameOver()) {
+                    return;
+                }
                 assert (args.length == 1);
                 this.makeMove(args[0]);
-                super.fireUpdate(args[0], this.currentTurn);
+                super.fireUpdate(args[0], !this.gameState.playerOne);
                 result = this.afterMove();
                 break;
             default:
@@ -284,11 +194,11 @@ public class Board extends Updater implements Testable {
 
         }
 
-        if(result == -1) {
+        if (result == -1) {
             this.gamePointer.switchTurns();
 
             this.gamePointer.askForNextMove();
-        } else if(result == 0) {
+        } else if (result == 0) {
             this.reset();
             super.fireUpdate(-1);
         } else {
@@ -325,19 +235,9 @@ public class Board extends Updater implements Testable {
     @Override
     public boolean equals(Object obj) {
 
-        if (!(obj instanceof Board board)) {
-            return false;
-        }
+        if (!(obj instanceof Board board)) return false;
 
-        if (board.size != this.size) {
-            return false;
-        }
-
-        if (board.currentTurn != this.currentTurn) {
-            return false;
-        }
-
-        return Arrays.deepEquals(board.tiles, this.tiles);
+        return this.gameState.equals(board.gameState);
     }
 
 }

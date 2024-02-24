@@ -11,10 +11,9 @@ import static org.junit.jupiter.api.Assertions.*;
 class UpdaterTest {
 
     private Updater updater;
-    private Updatable[] updatables;
-    private final static int NUM_UPDATEBALES = 5;
+    private Updatable updatableA, updatableB;
 
-    private int editableCounter = 0;
+    private int editableCounter;
 
     @BeforeEach
     void setUP() {
@@ -26,67 +25,79 @@ class UpdaterTest {
             }
         };
 
-        this.updatables = new Updatable[NUM_UPDATEBALES];
-        for (int i = 0; i < NUM_UPDATEBALES; i++) {
-            this.updatables[i] = new Updatable() {
-                @Override
-                public void update(Object... obj) {
-                    editableCounter += 1;
-                }
-            };
-        }
+        this.updatableA = obj -> editableCounter+=1;
+        this.updatableB = obj -> editableCounter+=2;
+
+        this.editableCounter = 0;
     }
 
-    private void fillUpdater() {
-        //this.updater.attach(this.updatables[0]);
-       // this.updater.attach(this.updatables[1]);
-       // this.updater.attach(this.updatables[2]);
-       // this.updater.attach(this.updatables[3]);
-       // this.updater.attach(this.updatables[4]);
+    @Test
+    void testIsEmpty() {
+        assertEquals(0, this.updater.getNumberAttached());
     }
 
     @Test
     void testAttach() {
-        this.fillUpdater();
-       // assertDoesNotThrow(() -> this.updater.attach(this.updatables[0]));
-       // assertDoesNotThrow(() -> this.updater.attach(null));
+        this.updater.attach(this.updatableA);
+        this.updater.attach(this.updatableB);
+        assertEquals(2,this.updater.getNumberAttached());
+    }
+
+    @Test
+    void testAttachTwice() {
+        this.updater.attach(this.updatableA);
+        this.updater.attach(this.updatableA);
+        assertEquals(1, this.updater.getNumberAttached());
+    }
+
+    @Test
+    void testAttachNull() {
+        this.updater.attach(null);
+        assertEquals(0, this.updater.getNumberAttached());
     }
 
     @Test
     void testDetach() {
-        this.fillUpdater();
-        this.updater.detach(this.updatables[0]);
-        assertDoesNotThrow(() -> this.updater.detach(this.updatables[0]));
+        this.updater.attach(this.updatableA);
+        this.updater.attach(this.updatableB);
+        this.updater.detach(this.updatableA);
+        assertEquals(1,this.updater.getNumberAttached());
+    }
+    @Test
+    void testDetachTwiceSize() {
+        this.updater.attach(this.updatableA);
+        this.updater.detach(this.updatableA);
+        this.updater.detach(this.updatableA);
+        assertEquals(0, this.updater.getNumberAttached());
+    }
+
+    @Test
+    void testDetachTwiceThrows() {
+        this.updater.attach(this.updatableA);
+        this.updater.detach(this.updatableA);
+        this.updater.detach(this.updatableA);
+        assertDoesNotThrow(()-> this.updater.getNumberAttached());
+    }
+
+    @Test
+    void testDetachNull() {
         assertDoesNotThrow(() -> this.updater.detach(null));
     }
 
     @Test
-    void testFireUpdateNormal() {
-        fillUpdater();
-        this.updater.fireUpdate(null);
-        assertEquals(this.editableCounter, 5);
+    void testFireUpdate() {
+        this.updater.attach(this.updatableA);
+        this.updater.attach(this.updatableB);
+        this.updater.fireUpdate((Object) null);
+        assertEquals(3,this.editableCounter);
     }
 
-    @Test
-    void testFireUpdateOverfilled() {
-        fillUpdater();
-        fillUpdater();
-        this.updater.fireUpdate(null);
-        assertEquals(this.editableCounter, 5);
-    }
 
     @Test
-    void testFireUpdateFew() {
-       // this.updater.attach(this.updatables[1]);
-      //  this.updater.attach(this.updatables[2]);
-        this.updater.fireUpdate(null);
-        assertEquals(this.editableCounter, 2);
-    }
-
-    @Test
-    void testService() {
-        this.updater.service(Origin.CONTROLLER, 0);
-        assertEquals(this.editableCounter, 100);
+    void testService() throws InterruptedException {
+        this.updater.service(null, 0);
+        Thread.sleep(10);
+        assertEquals(100,this.editableCounter);
     }
 
 }
