@@ -81,11 +81,11 @@ public class Board {
 
     /**
      * Constructs an empty TicTacToe Board ready to be played on.
-     * @param size determines the number of row and columns. Must be in range [1, 8].
+     * @param size determines the number of row and columns. Must be in range [2, 8].
      */
     public Board(int size) {
-        if (size < 1 || size > 8) {
-            throw new IllegalArgumentException("Board size must be in range [1, 8]");
+        if (size < 2 || size > 8) {
+            throw new IllegalArgumentException("Board size must be in range [2, 8]");
         }
         this.SIZE = (byte) size;
         this.SIZE_SQUARED = (byte) (this.SIZE * this.SIZE);
