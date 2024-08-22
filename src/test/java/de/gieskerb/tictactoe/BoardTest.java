@@ -1,180 +1,101 @@
 package test.java.de.gieskerb.tictactoe;
 
-import main.java.de.gieskerb.tictactoe.exceptions.*;
-import main.java.de.gieskerb.tictactoe.model.Board;
-import main.java.de.gieskerb.tictactoe.model.Game;
-import main.java.de.gieskerb.tictactoe.model.Updater;
-import main.java.de.gieskerb.tictactoe.util.Pair;
+import main.java.de.gieskerb.tictactoe.Board;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class BoardTest {
+public class BoardTest {
 
     private Board board;
 
-    private void fill3by3Board() {
-        this.board.invokeMethod(new FriendTestAccess("makeMove", 0));
-        this.board.invokeMethod(new FriendTestAccess("afterMove"));
-        this.board.invokeMethod(new FriendTestAccess("makeMove", 1));
-        this.board.invokeMethod(new FriendTestAccess("afterMove"));
-        this.board.invokeMethod(new FriendTestAccess("makeMove", 2));
-        this.board.invokeMethod(new FriendTestAccess("afterMove"));
-        this.board.invokeMethod(new FriendTestAccess("makeMove", 3));
-        this.board.invokeMethod(new FriendTestAccess("afterMove"));
-        this.board.invokeMethod(new FriendTestAccess("makeMove", 5));
-        this.board.invokeMethod(new FriendTestAccess("afterMove"));
-        this.board.invokeMethod(new FriendTestAccess("makeMove", 4));
-        this.board.invokeMethod(new FriendTestAccess("afterMove"));
-        this.board.invokeMethod(new FriendTestAccess("makeMove", 6));
-        this.board.invokeMethod(new FriendTestAccess("afterMove"));
-        this.board.invokeMethod(new FriendTestAccess("makeMove", 8));
-        this.board.invokeMethod(new FriendTestAccess("afterMove"));
-        this.board.invokeMethod(new FriendTestAccess("makeMove", 7));
-
-    }
-
     @BeforeEach
     void setUp() {
-        board = new Board(new Game());
-    }
-
-
-    @Test
-    void testConvertIndexToCoordsCorrect() {
-        assertEquals(new Pair<>((byte) 2, (byte) 1), board.invokeMethod(new FriendTestAccess("convertIndexToCoords", 7, (byte) 3)));
+        board = new Board(3);
     }
 
     @Test
-    void testConvertIndexToCoordsFalse() {
-        assertNotEquals(new Pair<>((byte) 1, (byte) 0), board.invokeMethod(new FriendTestAccess("convertIndexToCoords", 8, (byte) 3)));
+    void testIsEmpty() {
+        assertEquals(board.getTile(0), Board.Tile.EMPTY);
     }
 
     @Test
-    void testConvertIndexToCoordsThrowsToSmall() {
-        assertThrows(OutOfBounceException.class, () -> board.invokeMethod(new FriendTestAccess("convertIndexToCoords", -2, (byte) 3)));
+    void testPlacement() {
+        board.makeMove(3);
+        assertEquals(board.getTile(3), Board.Tile.PLAYER1);
     }
 
     @Test
-    void testConvertIndexToCoordsThrowsToBig() {
-        assertThrows(OutOfBounceException.class, () -> board.invokeMethod(new FriendTestAccess("convertIndexToCoords", 10, (byte) 3)));
+    void testPlayerOrder() {
+        board.makeMove(3);
+        board.makeMove(4);
+        assertEquals(board.getTile(4), Board.Tile.PLAYER2);
+    }
+
+    private void fillBoardNotWin() {
+        board.makeMove(0);
+        board.makeMove(1);
+        board.makeMove(2);
+        board.makeMove(4);
+        board.makeMove(3);
+        board.makeMove(5);
+        board.makeMove(7);
+        board.makeMove(6);
+        board.makeMove(8);
     }
 
     @Test
-    void testBoardConstructorThrowsToSmall() {
-        assertThrows(WrongBoardSizeException.class, () -> new Board(1,null));
+    void testNoWinPlayerOne() {
+        fillBoardNotWin();
+        assertFalse(board.checkWinPlayerOne());
     }
 
     @Test
-    void testBoardConstructorThrowsToBig() {
-        assertThrows(WrongBoardSizeException.class, () -> new Board(120, null));
+    void testNoWinPlayerTwo() {
+        fillBoardNotWin();
+        assertFalse(board.checkWinPlayerTwo());
     }
 
     @Test
-    void testGameStateCreation() {
-        assertNotNull(this.board.exportGameState());
+    void testWinPlayerOneHorizontal() {
+        board.makeMove(0);
+        board.makeMove(3);
+        board.makeMove(1);
+        board.makeMove(4);
+        board.makeMove(2);
+        assertTrue(board.checkWinPlayerOne());
     }
 
     @Test
-    void testMakeMoveThrowsOutOfBounce1() {
-        assertThrows(OutOfBounceException.class, () -> board.invokeMethod(new FriendTestAccess("makeMove", -1)));
+    void testWinPlayerTwoVertical() {
+        board.makeMove(0);
+        board.makeMove(1);
+        board.makeMove(8);
+        board.makeMove(4);
+        board.makeMove(2);
+        board.makeMove(7);
+        assertFalse(board.checkWinPlayerOne());
+        assertTrue(board.checkWinPlayerTwo());
     }
 
     @Test
-    void testMakeMoveThrowsOutOfBounce2() {
-        assertThrows(OutOfBounceException.class, () -> board.invokeMethod(new FriendTestAccess("makeMove", 9)));
-    }
-
-    @Test
-    void testMakeMoveThrowsOutOfBounce3() {
-        assertThrows(OutOfBounceException.class, () -> board.invokeMethod(new FriendTestAccess("makeMove", 10, 2)));
-    }
-
-    @Test
-    void testMakeMoveThrowsOutOfBounce4() {
-        assertThrows(OutOfBounceException.class, () -> board.invokeMethod(new FriendTestAccess("makeMove", 0, 4)));
-    }
-
-    @Test
-    void testMakeMoveThrowsOutOfBounce5() {
-        assertThrows(OutOfBounceException.class, () -> board.invokeMethod(new FriendTestAccess("makeMove", -1, 1)));
-    }
-
-    @Test
-    void testMakeMoveThrowsOutOfBounce6() {
-        assertThrows(OutOfBounceException.class, () -> board.invokeMethod(new FriendTestAccess("makeMove", 0, -4)));
-    }
-
-    @Test
-    void testMakeMoveNonEmptyTile() {
-        board.invokeMethod(new FriendTestAccess("makeMove", 1, 1));
-        assertThrows(NonEmptyTileException.class, () -> board.invokeMethod(new FriendTestAccess("makeMove", 1, 1)));
-    }
-
-    @Test
-    void testServiceSwitchTurns() {
-        assertFalse(false);
-    }
-
-    @Test
-    void testIsGameOverWithWin() {
-        board.invokeMethod(new FriendTestAccess("makeMove", 0));
-        board.invokeMethod(new FriendTestAccess("afterMove"));
-        board.invokeMethod(new FriendTestAccess("makeMove", 3));
-        board.invokeMethod(new FriendTestAccess("afterMove"));
-        board.invokeMethod(new FriendTestAccess("makeMove", 1));
-        board.invokeMethod(new FriendTestAccess("afterMove"));
-        board.invokeMethod(new FriendTestAccess("makeMove", 4));
-        board.invokeMethod(new FriendTestAccess("afterMove"));
-        board.invokeMethod(new FriendTestAccess("makeMove", 2));
-        assertTrue(board.exportGameState().isGameOver());
-    }
-
-    @Test
-    void testIsGameOverWithDraw() {
-        this.fill3by3Board();
-        assertTrue(board.exportGameState().isGameOver());
-    }
-
-    @Test
-    void testCopyConstructor() {
-        this.fill3by3Board();
-        Board copyBoard = new Board(this.board);
-        assertEquals(this.board, copyBoard);
-    }
-
-    @Test
-    void testReset() {
-        this.fill3by3Board();
-        this.board.invokeMethod(new FriendTestAccess("reset"));
-        assertEquals(new Board((Game) null), this.board);
-    }
-
-    @Test
-    public void testEqualsNull() {
-        assertNotEquals(null,this.board);
+    void testWinVerticalTLBR() {
+        board.makeMove(0);
+        board.makeMove(1);
+        board.makeMove(4);
+        board.makeMove(2);
+        board.makeMove(8);
+        assertTrue(board.checkWinPlayerOne());
     }
     @Test
-    public void testEqualsNonBoard() {
-        assertNotEquals(new Object(),this.board);
-    }
-    @Test
-    public void testEqualsWrongSize() {
-        assertNotEquals(new Board(4,  null),this.board);
-    }
-    @Test
-    public void testEqualsWrongCurrentTurn() {
-        Board copy = new Board(this.board);
-        this.board.invokeMethod(new FriendTestAccess("afterMove"));
-        assertNotEquals(copy,this.board);
-    }
-    @Test
-    public void testEqualsWrongTiles() {
-        Board copy = new Board(this.board);
-        this.board.invokeMethod(new FriendTestAccess("makeMove",0));
-        assertNotEquals(copy,this.board);
+    void testWinVerticalBLTR() {
+        board.makeMove(6);
+        board.makeMove(1);
+        board.makeMove(4);
+        board.makeMove(0);
+        board.makeMove(2);
+        assertTrue(board.checkWinPlayerOne());
     }
 
 }
