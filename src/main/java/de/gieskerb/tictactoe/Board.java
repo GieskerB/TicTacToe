@@ -1,5 +1,7 @@
 package main.java.de.gieskerb.tictactoe;
 
+import main.java.de.gieskerb.tictactoe.enums.Player;
+
 import java.util.ArrayList;
 
 public class Board {
@@ -26,9 +28,9 @@ public class Board {
     private final ArrayList<Long> winningBitMaps;
 
     /**
-     * Remembers current player. (Either true := Player1 | false := Player2)
+     * Remembers current player.
      */
-    private boolean currentPlayer;
+    private Player currentPlayer;
 
     /**
      * Creates all bitmaps to check for horizontal, vertical ior diagonal wins.
@@ -92,7 +94,7 @@ public class Board {
         this.bitMapPlayerOne = 0;
         this.bitMapPlayerTwo = 0;
         this.winningBitMaps = Board.createWinningBitMaps(this.SIZE);
-        this.currentPlayer = true;
+        this.currentPlayer = Player.ONE;
     }
 
     /**
@@ -134,16 +136,16 @@ public class Board {
             }
         }
         // making the move by storing it in the right bitmap.
-        if(this.currentPlayer) {
+        if(this.currentPlayer == Player.ONE) {
             this.bitMapPlayerOne |= index;
         } else {
             this.bitMapPlayerTwo |= index;
         }
-        this.currentPlayer = !this.currentPlayer;
+        this.currentPlayer = currentPlayer.otherPlayer();
     }
 
-    public boolean getCurrentPlayer() {
-        return this.currentPlayer;
+    public Player getPreviousPlayer() {
+        return this.currentPlayer.otherPlayer();
     }
 
     public boolean checkWinPlayerOne() {
