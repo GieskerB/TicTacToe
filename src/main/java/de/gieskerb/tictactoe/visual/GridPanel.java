@@ -54,7 +54,7 @@ public class GridPanel extends JPanel implements MouseListener {
         this.restart();
     }
 
-    void restart() {
+    public void restart() {
         this.createGrid();
     }
 
@@ -73,16 +73,16 @@ public class GridPanel extends JPanel implements MouseListener {
     }
 
     @Override
-    public void mouseClicked(MouseEvent e) {
-    }
-
-    @Override
     public void mousePressed(MouseEvent e) {
         for (int i = 0; i < this.size * this.size; i++) {
             if (e.getSource() == this.tiles[i]) {
                 this.gamePlayLoop.receiveInput(i, Origin.KEYBOARD);
             }
         }
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
     }
 
     @Override

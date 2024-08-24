@@ -98,4 +98,33 @@ public class BoardTest {
         assertTrue(board.checkWinPlayerOne());
     }
 
+    @Test
+    void testEmptyNoTie() {
+        assertFalse(board.checkTie());
+    }
+
+    @Test
+    void testNoTie() {
+        board.makeMove(0);
+        board.makeMove(1);
+        board.makeMove(4);
+        board.makeMove(3);
+        board.makeMove(8);
+        assertFalse(board.checkTie());
+    }
+
+    @Test
+    void testTie() {
+        board.makeMove(0);
+        board.makeMove(1);
+        board.makeMove(2);
+        board.makeMove(5);
+        board.makeMove(3);
+        board.makeMove(6);
+        board.makeMove(4);
+        board.makeMove(8);
+        board.makeMove(7);
+        assertTrue(board.checkTie());
+    }
+
 }

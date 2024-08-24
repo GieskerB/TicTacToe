@@ -20,18 +20,29 @@ public class GamePlayLoop {
         Thread gameLoop = new Thread(() -> {
 
             while (true) {
+                try {
+                    Thread.sleep(20);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+
+                if (this.board.checkGameOver()){
+                    System.out.println("Game Over");
+                    return;
+                }
+
                 switch (this.gameMode) {
                     case PvP -> {
                     }
                     case PvC -> {
-                        if(this.board.getPreviousPlayer() == Player.TWO) {
+                        if (this.board.getCurrentPlayer() == Player.TWO) {
                             int index = computerMove(this.difficultyTwo);
                             this.receiveInput(index, Origin.COMPUTER);
                             this.gridPanel.makeMove(index, Player.TWO);
                         }
                     }
                     case CvP -> {
-                        if(this.board.getPreviousPlayer() == Player.ONE) {
+                        if (this.board.getCurrentPlayer() == Player.ONE) {
                             int index = computerMove(this.difficultyOne);
                             this.receiveInput(index, Origin.COMPUTER);
                             this.gridPanel.makeMove(index, Player.ONE);
@@ -39,7 +50,7 @@ public class GamePlayLoop {
                     }
                     case CvC -> {
 
-                        if(this.board.getPreviousPlayer() == Player.ONE) {
+                        if (this.board.getCurrentPlayer() == Player.ONE) {
                             int index = computerMove(this.difficultyOne);
                             this.board.makeMove(index);
                             this.gridPanel.makeMove(index, Player.ONE);
@@ -56,11 +67,6 @@ public class GamePlayLoop {
 
                     }
                 }
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
             }
 
         });
@@ -71,7 +77,20 @@ public class GamePlayLoop {
     }
 
     private int computerMove(Difficulty difficulty) {
-        return 0;
+        switch (difficulty) {
+            case EASY -> {
+                return ComputerPlayer.easyDifficulty(new Board(this.board));
+            }
+            case MEDIUM -> {
+                return ComputerPlayer.mediumDifficulty(new Board(this.board));
+            }
+            case HARD -> {
+                return ComputerPlayer.hardDifficulty(new Board(this.board));
+            }
+            default ->
+                throw new RuntimeException("Difficulty not recognized");
+
+        }
     }
 
     public GamePlayLoop() {
@@ -83,7 +102,7 @@ public class GamePlayLoop {
         this.startGamePlayLoop();
     }
 
-    public void attachGridPanel (GridPanel gridPanel) {
+    public void attachGridPanel(GridPanel gridPanel) {
         this.gridPanel = gridPanel;
     }
 
@@ -103,17 +122,39 @@ public class GamePlayLoop {
         this.gridPanel.changeSize(size);
     }
 
-    void restartGame() {
+    public void restartGame() {
         this.board = new Board(this.size);
+        this.gridPanel.restart();
     }
 
     public void receiveInput(int index, Origin origin) {
+        if (this.board.checkGameOver()) return;
+
+        switch (this.gameMode) {
+            case PvP:
+                if (origin == Origin.COMPUTER) return;
+
+                break;
+            case PvC:
+                if ((this.board.getCurrentPlayer() == Player.ONE && origin == Origin.COMPUTER)
+                        || (this.board.getCurrentPlayer() == Player.TWO && origin == Origin.KEYBOARD)) return;
+                break;
+            case CvP:
+                if ((this.board.getCurrentPlayer() == Player.ONE && origin == Origin.KEYBOARD)
+                        || (this.board.getCurrentPlayer() == Player.TWO && origin == Origin.COMPUTER)) return;
+                break;
+            case CvC:
+                if (origin == Origin.KEYBOARD) return;
+                break;
+        }
+
+
         this.board.makeMove(index);
         this.gridPanel.makeMove(index, this.board.getPreviousPlayer());
-        if(board.checkWinPlayerOne()) {
+        if (board.checkWinPlayerOne()) {
             System.out.println("Player 1 wins!");
         }
-        if(board.checkWinPlayerTwo()) {
+        if (board.checkWinPlayerTwo()) {
             System.out.println("Player 2 wins!");
         }
     }

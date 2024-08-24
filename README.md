@@ -1,4 +1,4 @@
-# TicTacToe v5.0
+# TicTacToe v5
 
 ## History
 
@@ -18,13 +18,27 @@ the years I made some changes and added new features.
 
 ## Features of v5
 
-### v5.0
+### Gameplay
 
-- basically v1 but in JFrame. Foundation is set. 
-- tested with JUnit
-- Exceptions are thrown by when illegal actions are performed
+- Variable grid size from $2\times2$ upto $8\times8$.
+- Four different game modes:
+  - PvP
+  - PvC
+  - CvP
+  - CvC
+- Three different difficulties for the computer:
+  - Easy (Computer makes random moves)
+  - Medium (???)
+  - Hard (Computer uses minimax to play always the best move possible)
+- 
 
-### v5.1
+### Code
 
-- Visual support with JFrame
+- JUnit tests for all key classes:
+  - Board
+- Automatic computer player for each game mode.
+
+### JFrame
+
 - Slider for grid size
+- Extra settings window for game mode and difficulty

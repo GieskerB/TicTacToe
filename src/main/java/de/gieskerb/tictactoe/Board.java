@@ -81,6 +81,21 @@ public class Board {
         return bitMaps;
     }
 
+    private void checkBounds(long index) {
+        if (index < 0 || index >= this.SIZE_SQUARED) {
+            throw new IllegalArgumentException("Board index must be in range [0, " + (this.SIZE_SQUARED - 1) + "]");
+        }
+    }
+
+    public Board(Board board) {
+        this.SIZE = board.SIZE;
+        this.SIZE_SQUARED = board.SIZE_SQUARED;
+        this.bitMapPlayerOne = board.bitMapPlayerOne;
+        this.bitMapPlayerTwo = board.bitMapPlayerTwo;
+        this.winningBitMaps = board.winningBitMaps;
+        this.currentPlayer = board.currentPlayer;
+    }
+
     /**
      * Constructs an empty TicTacToe Board ready to be played on.
      * @param size determines the number of row and columns. Must be in range [2, 8].
@@ -97,15 +112,28 @@ public class Board {
         this.currentPlayer = Player.ONE;
     }
 
+    public int getSize() {
+        return this.SIZE;
+    }
+
+    public int getSizeSquared() {
+        return this.SIZE_SQUARED;
+    }
+
+    public boolean isEmptyTile(long index) {
+        this.checkBounds(index);
+        // Convert index to bitmap
+        index = 1L << index;;
+        //returns true if index is empty in either bitmap
+        return ((this.bitMapPlayerOne | this.bitMapPlayerTwo) & index) == 0;
+    }
+
     /**
      * @param index refers to a single tile counted form top left to bottom right, starting with 0.
      * @return Tile value for given index
      */
     public Tile getTile(long index) {
-        // Check bounds
-        if (index < 0 || index >= this.SIZE_SQUARED) {
-            throw new IllegalArgumentException("Board index must be in range [0, " + (this.SIZE_SQUARED - 1) + "]");
-        }
+        this.checkBounds(index);
         // Convert index to bitmap
         index = 1L << index;;
         // Return corresponding value
@@ -122,10 +150,7 @@ public class Board {
      * @param index refers to a single tile counted form top left to bottom right, starting with 0.
      */
     public void makeMove(long index) {
-        // Check bounds
-        if (index < 0 || index >= this.SIZE_SQUARED) {
-            throw new IllegalArgumentException("Board index must be in range [0, " + (this.SIZE_SQUARED - 1) + "]");
-        }
+        this.checkBounds(index);
         {
             // Check occupancy
             byte tempIndex = (byte) index;
@@ -148,6 +173,10 @@ public class Board {
         return this.currentPlayer.otherPlayer();
     }
 
+    public Player getCurrentPlayer() {
+        return this.currentPlayer;
+    }
+
     public boolean checkWinPlayerOne() {
         for(long bitMap: this.winningBitMaps) {
             if((bitMap & this.bitMapPlayerOne) == bitMap) {
@@ -164,6 +193,15 @@ public class Board {
             }
         }
         return false;
+    }
+
+    public boolean checkTie() {
+        long tieBitMap = (1L << this.SIZE_SQUARED) -1;
+        return ((this.bitMapPlayerOne | this.bitMapPlayerTwo) & tieBitMap) == tieBitMap;
+    }
+
+    public boolean checkGameOver() {
+        return this.checkWinPlayerOne() || this.checkWinPlayerTwo() || this.checkTie();
     }
 
 }

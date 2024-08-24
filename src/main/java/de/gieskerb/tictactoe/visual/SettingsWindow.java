@@ -1,6 +1,7 @@
 package main.java.de.gieskerb.tictactoe.visual;
 
 import main.java.de.gieskerb.tictactoe.GamePlayLoop;
+import main.java.de.gieskerb.tictactoe.enums.Difficulty;
 import main.java.de.gieskerb.tictactoe.enums.GameMode;
 
 import javax.swing.*;
@@ -77,7 +78,15 @@ public class SettingsWindow extends JFrame implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         if(e.getSource() == this.applyButton) {
             int index = this.gameModeSelector.getSelectedIndex();
-            this.gamePlayLoop.changeGameMode(GameMode.values()[index]);
+            GameMode gameMode = GameMode.values()[index];
+            this.gamePlayLoop.changeGameMode(gameMode);
+
+            index = this.difficultySelectorPlayerOne.getSelectedIndex();
+            Difficulty difficultyPlayerOne = gameMode == GameMode.PvP || gameMode == GameMode.PvC ? Difficulty.HUMAN : Difficulty.values()[index];
+            index = this.difficultySelectorPlayerTwo.getSelectedIndex();
+            Difficulty difficultyPlayerTwo = gameMode == GameMode.PvP || gameMode == GameMode.CvP ? Difficulty.HUMAN : Difficulty.values()[index];
+            this.gamePlayLoop.changeDifficulties(difficultyPlayerOne, difficultyPlayerTwo);
+            this.gamePlayLoop.restartGame();
             super.dispose();
         }
     }
