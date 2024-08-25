@@ -1,47 +1,34 @@
-package main.java.de.gieskerb.tictactoe;
+package test.java.de.gieskerb.tictactoe;
 
+import main.java.de.gieskerb.tictactoe.Board;
+import main.java.de.gieskerb.tictactoe.ComputerPlayer;
 import main.java.de.gieskerb.tictactoe.enums.Player;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 
-public class ComputerPlayer {
+import static main.java.de.gieskerb.tictactoe.ComputerPlayer.getEmptyTiles;
 
-    public static ArrayList<Byte> getEmptyTiles(Board board) {
-        ArrayList<Byte> emptyTiles = new ArrayList<>(board.getSize());
-        for (byte i = 0; i < board.getSizeSquared(); i++ ) {
-            if(board.isEmptyTile(i)) {
-                emptyTiles.add(i);
-            }
-        }
-        return emptyTiles;
-    }
+public class MiniMaxTest {
 
-    static int easyDifficulty(Board board) {
-        ArrayList<Byte> emptyTiles = getEmptyTiles(board);
-        return emptyTiles.get((int) (Math.random() * emptyTiles.size()));
-    }
-
-    static int mediumDifficulty(Board board) {
-        return 1;
-    }
-
-    static private int minimax(Board board, int depth) {
+    static private int stdMinimax(Board board, int depth) {
         if (board.checkWinPlayerOne()) {
-            return -depth;
-        } else if (board.checkWinPlayerTwo()) {
             return depth;
+        } else if (board.checkWinPlayerTwo()) {
+            return -depth;
         } else if (board.checkTie()) {
             return 0;
         }
 
-        ArrayList<Byte> emptyTiles = getEmptyTiles(board);
+        ArrayList<Byte> emptyTiles = ComputerPlayer.getEmptyTiles(board);
         int bestScore;
         if(board.getCurrentPlayer()== Player.ONE) {
             bestScore = Integer.MIN_VALUE;
             for(byte move: emptyTiles) {
                 board.makeMove(move);
 
-                int score = minimax(board, depth - 1);
+                int score = stdMinimax(board, depth - 1);
 
                 if(score > bestScore) {
                     bestScore = score;
@@ -54,7 +41,7 @@ public class ComputerPlayer {
             for(byte move: emptyTiles) {
                 board.makeMove(move);
 
-                int score = minimax(board, depth - 1);
+                int score = stdMinimax(board, depth - 1);
 
                 if(score < bestScore) {
                     bestScore = score;
@@ -66,20 +53,19 @@ public class ComputerPlayer {
         return bestScore;
     }
 
-    static int hardDifficulty(Board board) {
+    private static ArrayList<Byte> bestMoves(Board board) {
         System.out.println("Started thinking");
         ArrayList<Byte> emptyTiles = getEmptyTiles(board);
         ArrayList<Byte> bestMoves = new ArrayList<>();
-        int bestScore = Integer.MIN_VALUE;
+        int bestScore = 0;
         for(byte move: emptyTiles) {
             board.makeMove(move);
 
-            int score = minimax(board, board.getSizeSquared());
+            int score = stdMinimax(board, board.getSizeSquared());
             if (board.getPreviousPlayer() == Player.TWO) {
-              score *= -1;
+                score *= -1;
             }
 
-            System.err.println("Score: " + score + " ");
             if (score > bestScore) {
                 bestScore = score;
                 bestMoves.clear();
@@ -91,10 +77,22 @@ public class ComputerPlayer {
             board.undoMove(move);
         }
 
-        for(byte move: bestMoves) {
+        return bestMoves;
+    }
+
+    Board board;
+
+    @BeforeEach
+    void setUp() {
+        this.board = new Board(3);
+        for(byte move: bestMoves(board)) {
             System.out.print(move + " ");
         } System.out.println();
-        return bestMoves.get((int) (Math.random() * bestMoves.size()));
+    }
+
+    @Test
+    void testSomething() {
+
     }
 
 }

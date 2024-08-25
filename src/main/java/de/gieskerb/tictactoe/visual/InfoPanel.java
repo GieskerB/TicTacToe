@@ -102,7 +102,6 @@ public class InfoPanel extends JPanel implements ActionListener, ChangeListener 
             if (this.gridSizeSlider.getValue() != previousSliderValue) {
                 this.previousSliderValue = this.gridSizeSlider.getValue();
                 this.gamePlayLoop.changeSize(this.gridSizeSlider.getValue());
-                this.gamePlayLoop.restartGame();
             }
         }
     }

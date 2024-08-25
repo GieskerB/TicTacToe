@@ -169,6 +169,26 @@ public class Board {
         this.currentPlayer = currentPlayer.otherPlayer();
     }
 
+    public void undoMove(long index) {
+        this.checkBounds(index);
+        {
+            // Check occupancy
+            byte tempIndex = (byte) index;
+            index = 1L << index;
+
+            if (((this.bitMapPlayerOne | this.bitMapPlayerTwo) & index) == 0) {
+                throw new RuntimeException("No Player has made a move at this index: " + tempIndex + "!");
+            }
+        }
+        // undoing the move, by changing the other (previous) players bitmap
+        if(this.currentPlayer == Player.TWO) {
+            this.bitMapPlayerOne ^= index;
+        } else {
+            this.bitMapPlayerTwo ^= index;
+        }
+        this.currentPlayer = currentPlayer.otherPlayer();
+    }
+
     public Player getPreviousPlayer() {
         return this.currentPlayer.otherPlayer();
     }

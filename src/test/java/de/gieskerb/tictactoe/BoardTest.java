@@ -1,6 +1,7 @@
 package test.java.de.gieskerb.tictactoe;
 
 import main.java.de.gieskerb.tictactoe.Board;
+import main.java.de.gieskerb.tictactoe.enums.Player;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -21,7 +22,7 @@ public class BoardTest {
     }
 
     @Test
-    void testPlacement() {
+    void testMakeMove() {
         board.makeMove(3);
         assertEquals(board.getTile(3), Board.Tile.PLAYER1);
     }
@@ -125,6 +126,20 @@ public class BoardTest {
         board.makeMove(8);
         board.makeMove(7);
         assertTrue(board.checkTie());
+    }
+
+    @Test
+    void testUndoMove() {
+        board.makeMove(0);
+        board.undoMove(0);
+        assertEquals(board.getTile(0), Board.Tile.EMPTY);
+    }
+
+    @Test
+    void testUndoMoveChangePlayer() {
+        board.makeMove(0);
+        board.undoMove(0);
+        assertEquals(board.getCurrentPlayer(), Player.ONE);
     }
 
 }

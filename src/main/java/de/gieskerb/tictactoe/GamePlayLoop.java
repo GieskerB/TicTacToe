@@ -6,6 +6,8 @@ import main.java.de.gieskerb.tictactoe.enums.Origin;
 import main.java.de.gieskerb.tictactoe.enums.Player;
 import main.java.de.gieskerb.tictactoe.visual.GridPanel;
 
+import javax.swing.*;
+
 public class GamePlayLoop {
 
     private int size;
@@ -27,8 +29,8 @@ public class GamePlayLoop {
                 }
 
                 if (this.board.checkGameOver()){
-                    System.out.println("Game Over");
-                    return;
+                    this.handelGameOver();
+                    continue;
                 }
 
                 switch (this.gameMode) {
@@ -76,6 +78,17 @@ public class GamePlayLoop {
 
     }
 
+    private void handelGameOver() {
+        if(this.board.checkWinPlayerOne()) {
+            JOptionPane.showMessageDialog(null,"Player 1 has won the game.", "Game Over", JOptionPane.INFORMATION_MESSAGE);
+        } else if(this.board.checkWinPlayerTwo()) {
+            JOptionPane.showMessageDialog(null,"Player 2 has won the game.", "Game Over", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(null,"The games has ended in a tie.", "Game Over", JOptionPane.INFORMATION_MESSAGE);
+        }
+        this.restartGame();
+    }
+
     private int computerMove(Difficulty difficulty) {
         switch (difficulty) {
             case EASY -> {
@@ -118,8 +131,8 @@ public class GamePlayLoop {
 
     public void changeSize(int size) {
         this.size = size;
-        this.restartGame();
         this.gridPanel.changeSize(size);
+        this.restartGame();
     }
 
     public void restartGame() {
