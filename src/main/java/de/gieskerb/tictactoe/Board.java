@@ -34,6 +34,7 @@ public class Board {
 
     /**
      * Creates all bitmaps to check for horizontal, vertical ior diagonal wins.
+     *
      * @param size of the board is required to construct the correct bitmaps.
      * @return list of all bitmaps for a given size,
      */
@@ -43,38 +44,38 @@ public class Board {
 
         // Horizontal lines:
         tempBitMap = 1;
-        for(byte i = 0; i< size-1; i++) {
+        for (byte i = 0; i < size - 1; i++) {
             tempBitMap <<= 1;
             tempBitMap |= 1;
         }
-        for(byte i = 0; i< size; i++) {
+        for (byte i = 0; i < size; i++) {
             bitMaps.add(tempBitMap);
             tempBitMap <<= size;
         }
 
         // Vertical lines:
         tempBitMap = 1;
-        for(byte i = 0; i< size-1; i++) {
+        for (byte i = 0; i < size - 1; i++) {
             tempBitMap <<= size;
             tempBitMap |= 1;
         }
-        for(byte i = 0; i< size; i++) {
+        for (byte i = 0; i < size; i++) {
             bitMaps.add(tempBitMap);
             tempBitMap <<= 1;
         }
 
         //Diagonal lines:
         tempBitMap = 1;
-        for(byte i = 0; i< size-1; i++) {
+        for (byte i = 0; i < size - 1; i++) {
             tempBitMap <<= size + 1;
             tempBitMap |= 1;
         }
         bitMaps.add(tempBitMap);
 
-        tempBitMap = 1L << size-1;
-        for(byte i = 0; i< size-1; i++) {
+        tempBitMap = 1L << size - 1;
+        for (byte i = 0; i < size - 1; i++) {
             tempBitMap <<= size - 1;
-            tempBitMap |=  1L << size-1;
+            tempBitMap |= 1L << size - 1;
         }
         bitMaps.add(tempBitMap);
 
@@ -98,6 +99,7 @@ public class Board {
 
     /**
      * Constructs an empty TicTacToe Board ready to be played on.
+     *
      * @param size determines the number of row and columns. Must be in range [2, 8].
      */
     public Board(int size) {
@@ -123,7 +125,8 @@ public class Board {
     public boolean isEmptyTile(long index) {
         this.checkBounds(index);
         // Convert index to bitmap
-        index = 1L << index;;
+        index = 1L << index;
+
         //returns true if index is empty in either bitmap
         return ((this.bitMapPlayerOne | this.bitMapPlayerTwo) & index) == 0;
     }
@@ -135,9 +138,10 @@ public class Board {
     public Tile getTile(long index) {
         this.checkBounds(index);
         // Convert index to bitmap
-        index = 1L << index;;
+        index = 1L << index;
+        ;
         // Return corresponding value
-        if((this.bitMapPlayerOne & index) != 0) {
+        if ((this.bitMapPlayerOne & index) != 0) {
             return Tile.PLAYER1;
         } else if ((this.bitMapPlayerTwo & index) != 0) {
             return Tile.PLAYER2;
@@ -147,6 +151,7 @@ public class Board {
 
     /**
      * Playing a move by index. Automatically switches players after each move.
+     *
      * @param index refers to a single tile counted form top left to bottom right, starting with 0.
      */
     public void makeMove(long index) {
@@ -161,12 +166,12 @@ public class Board {
             }
         }
         // making the move by storing it in the right bitmap.
-        if(this.currentPlayer == Player.ONE) {
+        if (this.currentPlayer == Player.ONE) {
             this.bitMapPlayerOne |= index;
         } else {
             this.bitMapPlayerTwo |= index;
         }
-        this.currentPlayer = currentPlayer.otherPlayer();
+        this.currentPlayer = this.currentPlayer.otherPlayer();
     }
 
     public void undoMove(long index) {
@@ -180,13 +185,51 @@ public class Board {
                 throw new RuntimeException("No Player has made a move at this index: " + tempIndex + "!");
             }
         }
-        // undoing the move, by changing the other (previous) players bitmap
-        if(this.currentPlayer == Player.TWO) {
+
+        this.currentPlayer = this.currentPlayer.otherPlayer();
+        if (this.currentPlayer == Player.ONE) {
             this.bitMapPlayerOne ^= index;
         } else {
             this.bitMapPlayerTwo ^= index;
         }
-        this.currentPlayer = currentPlayer.otherPlayer();
+    }
+
+    public ArrayList<Byte> getEmptyTiles() {
+        ArrayList<Byte> emptyTiles = new ArrayList<>(this.SIZE_SQUARED);
+        for (byte i = 0; i < this.SIZE_SQUARED; i++) {
+            if (this.isEmptyTile(i)) {
+                emptyTiles.add(i);
+            }
+        }
+        return emptyTiles;
+    }
+
+    /**
+     * IMPORTANT: This method does not make any check regarding placement or in bounce check! Be carefully while using it!
+     */
+    public void makeMoveFast(final long bitmap) {
+        if (this.currentPlayer == Player.ONE) {
+            this.bitMapPlayerOne |= bitmap;
+        } else {
+            this.bitMapPlayerTwo |= bitmap;
+        }
+        this.currentPlayer = this.currentPlayer.otherPlayer();
+    }
+
+    /**
+     * IMPORTANT: This method does not make any check regarding placement or in bounce check! Be carefully while using it!
+     */
+    public void undoMoveFast(final long bitmap) {
+        this.currentPlayer = this.currentPlayer.otherPlayer();
+        if (this.currentPlayer == Player.ONE) {
+            this.bitMapPlayerOne ^= bitmap;
+        } else {
+            this.bitMapPlayerTwo ^= bitmap;
+        }
+    }
+
+    public long getEmptyTilesFast() {
+        return (~(this.bitMapPlayerOne | this.bitMapPlayerTwo)) & ((1L << this.SIZE_SQUARED) - 1);
     }
 
     public Player getPreviousPlayer() {
@@ -198,8 +241,8 @@ public class Board {
     }
 
     public boolean checkWinPlayerOne() {
-        for(long bitMap: this.winningBitMaps) {
-            if((bitMap & this.bitMapPlayerOne) == bitMap) {
+        for (long bitMap : this.winningBitMaps) {
+            if ((bitMap & this.bitMapPlayerOne) == bitMap) {
                 return true;
             }
         }
@@ -207,8 +250,8 @@ public class Board {
     }
 
     public boolean checkWinPlayerTwo() {
-        for(long bitMap: this.winningBitMaps) {
-            if((bitMap & this.bitMapPlayerTwo) == bitMap) {
+        for (long bitMap : this.winningBitMaps) {
+            if ((bitMap & this.bitMapPlayerTwo) == bitMap) {
                 return true;
             }
         }
@@ -216,7 +259,7 @@ public class Board {
     }
 
     public boolean checkTie() {
-        long tieBitMap = (1L << this.SIZE_SQUARED) -1;
+        long tieBitMap = (1L << this.SIZE_SQUARED) - 1;
         return ((this.bitMapPlayerOne | this.bitMapPlayerTwo) & tieBitMap) == tieBitMap;
     }
 

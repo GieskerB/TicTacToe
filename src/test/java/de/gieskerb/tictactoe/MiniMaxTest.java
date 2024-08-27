@@ -8,20 +8,21 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 
-import static main.java.de.gieskerb.tictactoe.ComputerPlayer.getEmptyTiles;
+import static org.junit.jupiter.api.Assertions.*;
+
 
 public class MiniMaxTest {
 
     static private int stdMinimax(Board board, int depth) {
         if (board.checkWinPlayerOne()) {
-            return depth;
-        } else if (board.checkWinPlayerTwo()) {
             return -depth;
+        } else if (board.checkWinPlayerTwo()) {
+            return depth;
         } else if (board.checkTie()) {
             return 0;
         }
 
-        ArrayList<Byte> emptyTiles = ComputerPlayer.getEmptyTiles(board);
+        ArrayList<Byte> emptyTiles = board.getEmptyTiles();
         int bestScore;
         if(board.getCurrentPlayer()== Player.ONE) {
             bestScore = Integer.MIN_VALUE;
@@ -54,10 +55,9 @@ public class MiniMaxTest {
     }
 
     private static ArrayList<Byte> bestMoves(Board board) {
-        System.out.println("Started thinking");
-        ArrayList<Byte> emptyTiles = getEmptyTiles(board);
+        ArrayList<Byte> emptyTiles = board.getEmptyTiles();
         ArrayList<Byte> bestMoves = new ArrayList<>();
-        int bestScore = 0;
+        int bestScore = Integer.MIN_VALUE;
         for(byte move: emptyTiles) {
             board.makeMove(move);
 
@@ -85,14 +85,14 @@ public class MiniMaxTest {
     @BeforeEach
     void setUp() {
         this.board = new Board(3);
-        for(byte move: bestMoves(board)) {
-            System.out.print(move + " ");
-        } System.out.println();
     }
 
     @Test
-    void testSomething() {
+    void testFirstMove() {
+        var checkList = bestMoves(board);
+        var testList = ComputerPlayer.hardDifficultyAllMoves(board);
 
+        assertEquals(checkList,testList);
     }
 
 }
