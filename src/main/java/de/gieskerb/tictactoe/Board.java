@@ -114,11 +114,15 @@ public class Board {
         this.currentPlayer = Player.ONE;
     }
 
-    public int getSize() {
-        return this.SIZE;
+    public long getBitMapPlayerOne() {
+        return this.bitMapPlayerOne;
     }
 
-    public int getSizeSquared() {
+    public long getBitMapPlayerTwo() {
+        return this.bitMapPlayerTwo;
+    }
+
+    public byte getSizeSquared() {
         return this.SIZE_SQUARED;
     }
 

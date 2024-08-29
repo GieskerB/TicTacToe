@@ -24,14 +24,14 @@ public class MiniMaxTest {
 
         ArrayList<Byte> emptyTiles = board.getEmptyTiles();
         int bestScore;
-        if(board.getCurrentPlayer()== Player.ONE) {
+        if (board.getCurrentPlayer() == Player.ONE) {
             bestScore = Integer.MIN_VALUE;
-            for(byte move: emptyTiles) {
+            for (byte move : emptyTiles) {
                 board.makeMove(move);
 
                 int score = stdMinimax(board, depth - 1);
 
-                if(score > bestScore) {
+                if (score > bestScore) {
                     bestScore = score;
                 }
 
@@ -39,12 +39,12 @@ public class MiniMaxTest {
             }
         } else {
             bestScore = Integer.MAX_VALUE;
-            for(byte move: emptyTiles) {
+            for (byte move : emptyTiles) {
                 board.makeMove(move);
 
                 int score = stdMinimax(board, depth - 1);
 
-                if(score < bestScore) {
+                if (score < bestScore) {
                     bestScore = score;
                 }
 
@@ -58,7 +58,7 @@ public class MiniMaxTest {
         ArrayList<Byte> emptyTiles = board.getEmptyTiles();
         ArrayList<Byte> bestMoves = new ArrayList<>();
         int bestScore = Integer.MIN_VALUE;
-        for(byte move: emptyTiles) {
+        for (byte move : emptyTiles) {
             board.makeMove(move);
 
             int score = stdMinimax(board, board.getSizeSquared());
@@ -70,7 +70,7 @@ public class MiniMaxTest {
                 bestScore = score;
                 bestMoves.clear();
                 bestMoves.add(move);
-            } else if(score == bestScore) {
+            } else if (score == bestScore) {
                 bestMoves.add(move);
             }
 
@@ -89,10 +89,17 @@ public class MiniMaxTest {
 
     @Test
     void testFirstMove() {
+        long start = System.currentTimeMillis();
         var checkList = bestMoves(board);
-        var testList = ComputerPlayer.hardDifficultyAllMoves(board);
+        long end = System.currentTimeMillis();
+        System.err.println(end - start);
 
-        assertEquals(checkList,testList);
+        start = System.currentTimeMillis();
+        var testList = ComputerPlayer.hardDifficultyAllMoves(board);
+        end = System.currentTimeMillis();
+        System.err.println(end - start);
+
+        assertEquals(checkList, testList);
     }
 
 }

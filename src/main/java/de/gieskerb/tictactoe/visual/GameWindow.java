@@ -23,7 +23,7 @@ public class GameWindow extends JFrame {
         GamePlayLoop gamePlayLoop = new GamePlayLoop();
         GridPanel gridPanel = new GridPanel(gamePlayLoop);
         gamePlayLoop.attachGridPanel(gridPanel);
-        InfoPanel infoPanel = new InfoPanel(gridPanel,gamePlayLoop);
+        ControlPanel infoPanel = new ControlPanel(gridPanel,gamePlayLoop);
 
         super.add(infoPanel, BorderLayout.NORTH);
         super.add(gridPanel, BorderLayout.SOUTH);
