@@ -263,7 +263,7 @@ public class Board {
     }
 
     public boolean checkTie() {
-        long tieBitMap = (1L << this.SIZE_SQUARED) - 1;
+        long tieBitMap = (1L << this.SIZE_SQUARED / 2 << this.SIZE_SQUARED / 2) - 1;
         return ((this.bitMapPlayerOne | this.bitMapPlayerTwo) & tieBitMap) == tieBitMap;
     }
 

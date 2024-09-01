@@ -1,12 +1,9 @@
 package main.java.de.gieskerb.tictactoe.visual;
 
-import main.java.de.gieskerb.tictactoe.Board;
 import main.java.de.gieskerb.tictactoe.GamePlayLoop;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class GameWindow extends JFrame {
 
@@ -23,7 +20,7 @@ public class GameWindow extends JFrame {
         GamePlayLoop gamePlayLoop = new GamePlayLoop();
         GridPanel gridPanel = new GridPanel(gamePlayLoop);
         gamePlayLoop.attachGridPanel(gridPanel);
-        ControlPanel infoPanel = new ControlPanel(gridPanel,gamePlayLoop);
+        ControlPanel infoPanel = new ControlPanel(gamePlayLoop);
 
         super.add(infoPanel, BorderLayout.NORTH);
         super.add(gridPanel, BorderLayout.SOUTH);

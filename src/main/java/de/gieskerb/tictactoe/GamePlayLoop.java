@@ -113,6 +113,9 @@ public class GamePlayLoop {
         this.gameMode = GameMode.PvP;
         this.gridPanel = null;
 
+        this.difficultyOne = Difficulty.HUMAN;
+        this.difficultyTwo = Difficulty.HUMAN;
+
         this.startGamePlayLoop();
     }
 
@@ -124,9 +127,12 @@ public class GamePlayLoop {
         this.gameMode = gameMode;
     }
 
-    public void changeDifficulties(Difficulty difficultyOne, Difficulty difficultyTwo) {
-        this.difficultyOne = difficultyOne;
-        this.difficultyTwo = difficultyTwo;
+    public void changeDifficulty(Difficulty difficulty,Player player) {
+        if(player==Player.ONE) {
+            this.difficultyOne = difficulty;
+        } else {
+            this.difficultyTwo = difficulty;
+        }
     }
 
     public void changeSize(int size) {
