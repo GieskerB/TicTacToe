@@ -68,6 +68,8 @@ public class ComputerPlayer {
         return allMoves.get((int) (Math.random() * allMoves.size()));
     }
 
+    private static Buffer moveBuffer = new Buffer(12);
+
     public static ArrayList<Byte> hardDifficultyAllMoves(Board board) {
         ArrayList<Byte> emptyTiles = board.getEmptyTiles();
         ArrayList<Byte> bestMoves = new ArrayList<>();
@@ -75,7 +77,15 @@ public class ComputerPlayer {
         for (byte move : emptyTiles) {
             board.makeMove(move);
 
-            byte score = minimax(board, (byte) 10, Integer.MIN_VALUE, Integer.MAX_VALUE);
+            byte score;
+            boolean containedInBuffer = false;
+            if(moveBuffer.contains(board.getBitMapPlayerOne(), board.getBitMapPlayerTwo(), board.getSize())) {
+                score = moveBuffer.getValue(board.getBitMapPlayerOne(), board.getBitMapPlayerTwo(), board.getSize());
+                containedInBuffer = true;
+            } else {
+                score = minimax(board, (byte) 5, Integer.MIN_VALUE, Integer.MAX_VALUE);
+            }
+
             if (board.getPreviousPlayer() == Player.TWO) {
                 score *= -1;
             }
@@ -86,6 +96,10 @@ public class ComputerPlayer {
                 bestMoves.add(move);
             } else if (score == bestScore) {
                 bestMoves.add(move);
+            }
+
+            if(!containedInBuffer) {
+                moveBuffer.setValue(board.getBitMapPlayerOne(), board.getBitMapPlayerTwo(), board.getSize(), (byte) -bestScore);
             }
 
             board.undoMove(move);

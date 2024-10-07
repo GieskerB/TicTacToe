@@ -79,6 +79,7 @@ public class ControlPanel extends JPanel implements ActionListener, ChangeListen
             radioButtons[i].setSize((int) Math.ceil(width / 3.0), height);
             radioButtons[i].setBackground(GameWindow.BACKGROUND_COLOR);
             radioButtons[i].setForeground(GameWindow.FOREGROUND_COLOR);
+            radioButtons[i].setFont(new Font("Cooper Black", Font.PLAIN, 16));
             radioButtons[i].setOpaque(true);
             radioButtons[i].setVisible(false);
             radioButtons[i].addActionListener(this);

@@ -122,6 +122,10 @@ public class Board {
         return this.bitMapPlayerTwo;
     }
 
+    public byte getSize() {
+        return this.SIZE;
+    }
+
     public byte getSizeSquared() {
         return this.SIZE_SQUARED;
     }

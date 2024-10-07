@@ -84,7 +84,7 @@ public class MiniMaxTest {
 
     @BeforeEach
     void setUp() {
-        this.board = new Board(3);
+        this.board = new Board(4);
     }
 
     @Test
@@ -92,12 +92,12 @@ public class MiniMaxTest {
         long start = System.currentTimeMillis();
         var checkList = bestMoves(board);
         long end = System.currentTimeMillis();
-        System.err.println(end - start);
+        System.err.println("STD-Minimax:     " + (end - start));
 
         start = System.currentTimeMillis();
         var testList = ComputerPlayer.hardDifficultyAllMoves(board);
         end = System.currentTimeMillis();
-        System.err.println(end - start);
+        System.err.println("Current-Minimax: " + (end - start));
 
         assertEquals(checkList, testList);
     }

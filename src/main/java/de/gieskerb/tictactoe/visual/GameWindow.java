@@ -13,7 +13,8 @@ public class GameWindow extends JFrame {
 
     public GameWindow() {
         super();
-        super.setTitle("Tic-Tac-Toe");
+        super.setTitle(">>> The ultimate Tic-Tac-Toe <<<");
+        super.setIconImage(new ImageIcon("ico/logo/icons8-tic-tac-toe-100.png").getImage());
         super.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         super.setLayout(new BorderLayout());
 

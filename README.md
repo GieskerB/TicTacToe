@@ -55,4 +55,3 @@ sizes on hard difficulty.
 - Slider for grid size
 - Player overview
 - Toggle between computer and human player in every moment
-- 

@@ -16,7 +16,7 @@ public class GridPanel extends JPanel implements MouseListener {
      * This constant makes sure that each possible grid size will divide each tile equally.
      */
     final static int PRIME_FACTOR_PRODUCT = 2 * 2 * 2 * 3 * 5 * 7;
-    private final static int[] PIXEL_BY_SIZE = new int[]{512,256,128,64,32,32,16};
+    private final static int[] PIXEL_BY_SIZE = new int[]{512, 256, 128, 64, 32, 32, 16};
 
     private byte size;
     private JLabel[] tiles;
@@ -65,9 +65,9 @@ public class GridPanel extends JPanel implements MouseListener {
         // TODO: slightly larger X
 
         if (player == Player.ONE) {
-            this.tiles[index].setIcon(new ImageIcon("ico/tic-tac-toe/X-" + PIXEL_BY_SIZE[this.size -2] + "px.png"));
+            this.tiles[index].setIcon(new ImageIcon("ico/tic-tac-toe/X-" + PIXEL_BY_SIZE[this.size - 2] + "px.png"));
         } else {
-            this.tiles[index].setIcon(new ImageIcon("ico/tic-tac-toe/O-" + PIXEL_BY_SIZE[this.size -2] + "px.png"));
+            this.tiles[index].setIcon(new ImageIcon("ico/tic-tac-toe/O-" + PIXEL_BY_SIZE[this.size - 2] + "px.png"));
         }
     }
 
@@ -80,7 +80,11 @@ public class GridPanel extends JPanel implements MouseListener {
     public void mousePressed(MouseEvent e) {
         for (int i = 0; i < this.size * this.size; i++) {
             if (e.getSource() == this.tiles[i]) {
-                this.gamePlayLoop.receiveInput(i, Origin.KEYBOARD);
+                try {
+                    this.gamePlayLoop.receiveInput(i, Origin.KEYBOARD);
+                } catch (RuntimeException ex) {
+                    System.err.println(ex.getMessage());
+                }
             }
         }
     }
