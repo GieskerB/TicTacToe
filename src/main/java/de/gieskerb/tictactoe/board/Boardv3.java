@@ -48,14 +48,15 @@ public class Boardv3 {
     private final byte SIZE,SQUARED_SIZE;
 
     private final long[] WINNING_BIT_MAPS;
+    private final long fullBoardBitMap;
 
-    private void checkBounds(long index) {
+    private void checkBounds(int index) {
         if (index < 0 || index >= this.SQUARED_SIZE) {
             throw  new IllegalArgumentException("Board size must be between 2 and 8");
         }
     }
 
-    private long indexToBitMap(long index){
+    private long indexToBitMap(int index){
         return 1L << index;
     }
 
@@ -66,13 +67,14 @@ public class Boardv3 {
         this.player1 = new Player(this, Tile.PLAYER1);
         this.player2 = new Player(this, Tile.PLAYER2);
         this.WINNING_BIT_MAPS = WinningBitMapGenerator.getBitMaps(this.SIZE);
+        this.fullBoardBitMap = (1L << this.SQUARED_SIZE) -1;;
     }
 
     public byte getSize() {
         return SIZE;
     }
 
-    public Tile getTile(long index) {
+    public Tile getTile(int index) {
         checkBounds(index);
         final long bitMap = indexToBitMap(index);
         if((this.player1.bitMap & bitMap) != 0) {
@@ -84,11 +86,32 @@ public class Boardv3 {
     }
 
     public boolean checkTie() {
-        final long tieBitMap = (1L << this.SQUARED_SIZE) -1;
-        return ((this.player1.bitMap | this.player2.bitMap) & tieBitMap) == tieBitMap;
+        return ((this.player1.bitMap | this.player2.bitMap) & this.fullBoardBitMap) == this.fullBoardBitMap;
     }
 
     public boolean checkGameOver() {
         return this.player1.checkWin() || this.player2.checkWin() || this.checkTie();
     }
+
+    public long getEmptyTilesBitMap() {
+        long emptyTiles = this.player1.bitMap |  this.player2.bitMap;
+        emptyTiles = ~ emptyTiles;
+        return emptyTiles & this.fullBoardBitMap;
+    }
+
+    public int[] getEmptyTiles() {
+        final long emptyBitMap = getEmptyTilesBitMap();
+        long compareBitMap = 1L;
+        int[] emptyTiles = new int[this.SQUARED_SIZE];
+        int emptyTilesCount = 0;
+        for(int i = 0; i< this.SQUARED_SIZE; i++) {
+            if((compareBitMap & emptyBitMap) == 0) {
+                emptyTiles[emptyTilesCount++] = i;
+            }
+        }
+        int[] reducedEmptyTiles = new int[emptyTilesCount];
+        System.arraycopy(emptyTiles, 0, reducedEmptyTiles, 0, emptyTilesCount);
+        return reducedEmptyTiles;
+    }
+
 }
