@@ -1,6 +1,6 @@
 package test.java.de.gieskerb.tictactoe;
 
-import main.java.de.gieskerb.tictactoe.Board;
+import main.java.de.gieskerb.tictactoe.board.Board;
 import main.java.de.gieskerb.tictactoe.enums.Player;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,130 +16,88 @@ public class BoardTest {
         board = new Board(3);
     }
 
+    /*
+     * Test main board functionalities
+     */
+
     @Test
-    void testIsEmpty() {
-        assertEquals(board.getTile(0), Board.Tile.EMPTY);
+    void testBoardMaxSize() {
+        // Should be fine
+        board = new Board(8);
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new Board(9)
+        );
     }
 
     @Test
-    void testMakeMove() {
-        board.makeMove(3);
-        assertEquals(board.getTile(3), Board.Tile.PLAYER1);
+    void testBoardMinSize() {
+        // Should be fine
+        board = new Board(2);
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new Board(1)
+        );
     }
 
     @Test
-    void testPlayerOrder() {
-        board.makeMove(3);
-        board.makeMove(4);
-        assertEquals(board.getTile(4), Board.Tile.PLAYER2);
-    }
-
-    private void fillBoardNotWin() {
-        board.makeMove(0);
-        board.makeMove(1);
-        board.makeMove(2);
-        board.makeMove(4);
-        board.makeMove(3);
-        board.makeMove(5);
-        board.makeMove(7);
-        board.makeMove(6);
-        board.makeMove(8);
+    void testNotGameOver() {
+        assertFalse(board.checkGameOver());
     }
 
     @Test
-    void testNoWinPlayerOne() {
-        fillBoardNotWin();
-        assertFalse(board.checkWinPlayerOne());
+    void testEmptyTileAtStart() {
+        Board.Tile tile = board.getTile(4);
+        assertEquals(Board.Tile.EMPTY, tile);
     }
 
     @Test
-    void testNoWinPlayerTwo() {
-        fillBoardNotWin();
-        assertFalse(board.checkWinPlayerTwo());
+    void testEmptyTilesAtStart() {
+        int[] emptyTiles = board.getEmptyTiles();
+        assertEquals(9, emptyTiles.length);
     }
 
     @Test
-    void testWinPlayerOneHorizontal() {
-        board.makeMove(0);
-        board.makeMove(3);
-        board.makeMove(1);
-        board.makeMove(4);
-        board.makeMove(2);
-        assertTrue(board.checkWinPlayerOne());
+    void testEmptyTilesBitMapAtStart() {
+        long emptyTiles = board.getEmptyTilesBitMap();
+        assertEquals(0b111111111, emptyTiles);
+    }
+
+    /*
+     * Test player functionalities
+     */
+
+    @Test
+    void testPlayerNotNull() {
+        assertNotNull(board.player1);
     }
 
     @Test
-    void testWinPlayerTwoVertical() {
-        board.makeMove(0);
-        board.makeMove(1);
-        board.makeMove(8);
-        board.makeMove(4);
-        board.makeMove(2);
-        board.makeMove(7);
-        assertFalse(board.checkWinPlayerOne());
-        assertTrue(board.checkWinPlayerTwo());
+    void testPlayerOneMakeMove() {
+        board.player1.makeMove(4);
+        assertEquals(Board.Tile.PLAYER1, board.getTile(4));
     }
 
     @Test
-    void testWinVerticalTLBR() {
-        board.makeMove(0);
-        board.makeMove(1);
-        board.makeMove(4);
-        board.makeMove(2);
-        board.makeMove(8);
-        assertTrue(board.checkWinPlayerOne());
+    void testPlayerOneUndoMove() {
+        board.player2.makeMove(4);
+        board.player2.undoMove(4);
+        assertEquals(Board.Tile.EMPTY, board.getTile(4));
     }
+
+
     @Test
-    void testWinVerticalBLTR() {
-        board.makeMove(6);
-        board.makeMove(1);
-        board.makeMove(4);
-        board.makeMove(0);
-        board.makeMove(2);
-        assertTrue(board.checkWinPlayerOne());
+    void testPlayerCheckWinFalse() {
+        board.player1.makeMove(0);
+        board.player1.makeMove(1);
+        assertFalse(board.player1.checkWin());
     }
 
     @Test
-    void testEmptyNoTie() {
-        assertFalse(board.checkTie());
+    void testPlayerCheckWinTrue() {
+        board.player2.makeMove(0);
+        board.player2.makeMove(1);
+        board.player2.makeMove(2);
+        assertTrue(board.player2.checkWin());
     }
-
-    @Test
-    void testNoTie() {
-        board.makeMove(0);
-        board.makeMove(1);
-        board.makeMove(4);
-        board.makeMove(3);
-        board.makeMove(8);
-        assertFalse(board.checkTie());
-    }
-
-    @Test
-    void testTie() {
-        board.makeMove(0);
-        board.makeMove(1);
-        board.makeMove(2);
-        board.makeMove(5);
-        board.makeMove(3);
-        board.makeMove(6);
-        board.makeMove(4);
-        board.makeMove(8);
-        board.makeMove(7);
-        assertTrue(board.checkTie());
-    }
-
-    @Test
-    void testUndoMove() {
-        board.makeMove(0);
-        board.undoMove(0);
-        assertEquals(board.getTile(0), Board.Tile.EMPTY);
-    }
-
-    @Test
-    void testUndoMoveChangePlayer() {
-        board.makeMove(0);
-        board.undoMove(0);
-        assertEquals(board.getCurrentPlayer(), Player.ONE);
-    }
-
 }

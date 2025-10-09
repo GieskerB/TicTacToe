@@ -10,7 +10,7 @@ public class BoardManager {
         PVP,PVC,CVP,CVC
     }
 
-    private Boardv3 board;
+    private Board board;
     private Player currentPlayer;
     private GameMode gameMode;
 
@@ -35,13 +35,13 @@ public class BoardManager {
     }
 
     public BoardManager() {
-        this.board = new Boardv3(3);
+        this.board = new Board(3);
         this.currentPlayer = Player.PLAYER_1;
         this.gameMode = GameMode.PVP;
     }
 
     public void changeSize(byte newSize) {
-        this.board = new Boardv3(newSize);
+        this.board = new Board(newSize);
         this.currentPlayer = Player.PLAYER_1;
     }
 
