@@ -54,6 +54,12 @@ public class BoardTest {
     @Test
     void testEmptyTilesAtStart() {
         int[] emptyTiles = board.getEmptyTiles();
+        assertArrayEquals(new int[]{0,1,2,3,4,5,6,7,8}, emptyTiles);
+    }
+
+    @Test
+    void testEmptyTilesLengthAtStart() {
+        int[] emptyTiles = board.getEmptyTiles();
         assertEquals(9, emptyTiles.length);
     }
 
@@ -100,4 +106,17 @@ public class BoardTest {
         board.player2.makeMove(2);
         assertTrue(board.player2.checkWin());
     }
+
+    @Test
+    void testEmptyTilesBitMapAfterMove() {
+        board.player1.makeMove(0);
+        assertEquals(0b111111110, board.getEmptyTilesBitMap());
+    }
+
+    @Test
+    void testEmptyTilesAfterMove() {
+        board.player1.makeMove(0);
+        assertArrayEquals(new int[]{1,2,3,4,5,6,7,8}, board.getEmptyTiles());
+    }
+
 }

@@ -110,6 +110,7 @@ public class Board {
             if ((compareBitMap & emptyBitMap) != 0) {
                 emptyTiles[emptyTilesCount++] = i;
             }
+            compareBitMap <<= 1;
         }
         int[] reducedEmptyTiles = new int[emptyTilesCount];
         System.arraycopy(emptyTiles, 0, reducedEmptyTiles, 0, emptyTilesCount);
