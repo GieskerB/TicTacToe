@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 
-public class AI {
+public class Computer {
 
     public enum Difficulty {
         EASY, NORMAL, HARD
@@ -57,9 +57,6 @@ public class AI {
             }
 
         }
-
-//        System.out.println("bestScore: " + bestScore + " eval: " + board.getEvaluation(depth));
-
         return bestScore;
     }
 
@@ -105,5 +102,4 @@ public class AI {
         }
         return -1;
     }
-
 }

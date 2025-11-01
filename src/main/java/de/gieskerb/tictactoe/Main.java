@@ -1,16 +1,14 @@
 package main.java.de.gieskerb.tictactoe;
 
-import main.java.de.gieskerb.tictactoe.board.Board;
+import main.java.de.gieskerb.tictactoe.board.BoardManager;
 
 import javax.swing.*;
 
 public class Main {
     public static void main (String[] args)  {
-        Board board = new Board(8);
-        for(int i = 0; i< 64; i++) {
-            board.player1.makeMove(i);
-        }
-        System.out.println(board.getEvaluation(0));
+        BoardManager boardManager = new BoardManager();
+        BoardManager.Player winningPlayer = boardManager.playFullRound();
+        System.out.println(winningPlayer);
     }
 
 //        try {
