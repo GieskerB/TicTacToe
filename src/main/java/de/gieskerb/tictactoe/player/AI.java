@@ -27,29 +27,40 @@ public class AI {
     // PlayerOne is maximizing
     private static int miniMaxMove(Board board, boolean maximizing, int alpha, int beta, int depth) {
         if (board.player1.checkWin()) {
-            return 100  -depth;
+            return 1_000_000 - depth;
         } else if (board.player2.checkWin()) {
-            return -100 + depth;
+            return -1_000_000 + depth;
         } else if(board.checkTie()) {
             return 0;
+        } else if (depth == 7) {
+            return board.getEvaluation(depth);
         }
 
-        int bestScore = maximizing ? Integer.MAX_VALUE : Integer.MIN_VALUE;
+        depth++;
+        int bestScore = maximizing ? Integer.MIN_VALUE : Integer.MAX_VALUE;
         Board.Player currentPlayer = maximizing ? board.player1 : board.player2;
         for (int move: board.getEmptyTiles()) {
             currentPlayer.makeMove(move);
-            int score = miniMaxMove(board, maximizing, 0, 0, depth + 1);
+            int score = miniMaxMove(board, !maximizing, alpha, beta, depth);
             currentPlayer.undoMove(move);
-            if (score > bestScore) {
-                bestScore = score;
-            }
-        }
-        return bestScore;
-    }
 
-    private static int makeHardMove(Board board, boolean isPlayerOne) {
-        int[] bestMoves =  getBestMoves(board, isPlayerOne);
-        return bestMoves[random.nextInt(bestMoves.length)];
+            if (maximizing) {
+                bestScore = Math.max(bestScore, score);
+                alpha = Math.max(alpha, bestScore);
+            } else {
+                bestScore = Math.min(bestScore, score);
+                beta = Math.min(beta, bestScore);
+            }
+
+            if (beta <= alpha) {
+                break;
+            }
+
+        }
+
+//        System.out.println("bestScore: " + bestScore + " eval: " + board.getEvaluation(depth));
+
+        return bestScore;
     }
 
     public static int[] getBestMoves(Board board, boolean isPlayerOne) {
@@ -58,9 +69,10 @@ public class AI {
         Board.Player currentPlayer = isPlayerOne ? board.player1 : board.player2;
         for (int move: board.getEmptyTiles()) {
             currentPlayer.makeMove(move);
-            int score = miniMaxMove(board, !isPlayerOne,  0,0, 0);
+            int score = miniMaxMove(board, !isPlayerOne, Integer.MIN_VALUE, Integer.MAX_VALUE, 0);
+            System.out.println("Move " + move + " has score: " + score);
             currentPlayer.undoMove(move);
-            if(score > bestScore) {
+            if(score > bestScore && isPlayerOne || score < bestScore && !isPlayerOne) {
                 bestScore = score;
                 bestMoves.clear();
                 bestMoves.add(move);
@@ -68,8 +80,15 @@ public class AI {
                 bestMoves.add(move);
             }
         }
+        System.out.println(bestScore);
         // TODO maybe for loops.
         return Arrays.stream(bestMoves.toArray(Integer[]::new)).mapToInt(Integer::intValue).toArray();
+    }
+
+
+    private static int makeHardMove(Board board, boolean isPlayerOne) {
+        int[] bestMoves =  getBestMoves(board, isPlayerOne);
+        return bestMoves[random.nextInt(bestMoves.length)];
     }
 
     public static int makeMove(Board board, Difficulty difficulty, boolean isPlayerOne) {

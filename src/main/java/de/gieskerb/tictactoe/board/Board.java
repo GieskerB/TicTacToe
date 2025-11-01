@@ -117,4 +117,47 @@ public class Board {
         return reducedEmptyTiles;
     }
 
+    private int brianKernighansAlgorithm(long bitmap) {
+        int count = 0;
+        while (bitmap != 0) {
+            bitmap &= (bitmap - 1);
+            count += 1;
+        }
+        return count;
+    }
+
+    public int getEvaluation(int depth) {
+        int evaluation = 0;
+
+//        final long combinedBitMap = this.player1.bitMap | this.player2.bitMap;
+
+        for (long bitMap : this.WINNING_BIT_MAPS) {
+//            if ((combinedBitMap & bitMap) != 0) {
+                // At least one tile not empty along this line
+                long playerOneAlongLine = (bitMap & this.player1.bitMap);
+                long playerTwoAlongLine = (bitMap & this.player2.bitMap);
+                if (playerTwoAlongLine != 0 && playerOneAlongLine == 0) {
+                    // Only player two has played in this line
+                    final int tilesFilled = brianKernighansAlgorithm(playerTwoAlongLine);
+                    if (tilesFilled == this.SIZE) {
+                        // Player two has won the game
+                        return -100_000_000 + depth;
+                    }
+                    evaluation -= (int) Math.pow(10, tilesFilled - 1);
+                }
+                if (playerOneAlongLine != 0 && playerTwoAlongLine == 0) {
+                    // Only player one has played in this line
+                    final int tilesFilled = brianKernighansAlgorithm(playerOneAlongLine);
+                    if (tilesFilled == this.SIZE) {
+                        // Player one has won the game
+                        return 100_000_000 - depth;
+                    }
+                    evaluation += (int) Math.pow(10, tilesFilled - 1);
+                }
+//            }
+        }
+
+        return evaluation;
+    }
+
 }
