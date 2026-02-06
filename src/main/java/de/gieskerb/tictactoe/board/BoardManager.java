@@ -43,9 +43,13 @@ public class BoardManager {
         final boolean playerOnePlaying = this.currentPlayer == Player.PLAYER_1;
         int move;
         if (this.isComputerMove()) {
-            move = Computer.makeMove(board,playerOnePlaying ? this.difficultyAi1 : this.difficultyAi2,playerOnePlaying);
+            move = Computer.makeMove(this.board,playerOnePlaying ? this.difficultyAi1 : this.difficultyAi2,playerOnePlaying);
         } else {
-            move = Human.makeMove(board, this.inputDevice, playerOnePlaying);
+            move = Human.makeMove(this, this.inputDevice, playerOnePlaying);
+        }
+
+        if (move == -1) {
+            return null;
         }
 
         if(playerOnePlaying) {
@@ -70,7 +74,7 @@ public class BoardManager {
         this.gameMode = GameMode.PVP;
         this.difficultyAi1 = Computer.Difficulty.EASY;
         this.difficultyAi2 = Computer.Difficulty.EASY;
-        this.inputDevice = Human.InputDevice.CONSOLE;
+        this.inputDevice = Human.InputDevice.GUI;
     }
 
     public Player playFullRound() {

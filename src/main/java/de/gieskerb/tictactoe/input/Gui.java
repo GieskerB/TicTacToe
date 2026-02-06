@@ -11,6 +11,26 @@ import java.awt.event.*;
 
 public class Gui {
 
+    public static class Configuration {
+        public byte gridSize;
+        public BoardManager.GameMode gameMode;
+        public Computer.Difficulty difficultyPlayer1, difficultyPlayer2;
+
+        Configuration() {
+            this.gridSize = 3;
+            this.gameMode = BoardManager.GameMode.PVP;
+            this.difficultyPlayer1 = null;
+            this.difficultyPlayer2 = null;
+        }
+
+        Configuration(Configuration config) {
+            this.gridSize = config.gridSize;
+            this.gameMode = config.gameMode;
+            this.difficultyPlayer1 = config.difficultyPlayer1;
+            this.difficultyPlayer2 = config.difficultyPlayer2;
+        }
+    }
+
     private final static int WINDOW_SCALE = 4;
     private final static int SETTINGS_HEIGHT = 25;
     private final static int PRIME_FACTOR_PRODUCT = 2 * 3 * 5 * 7;
@@ -29,11 +49,16 @@ public class Gui {
     private final JFrame window;
     private final JPanel settingsPanel, gridPanel;
     private final JPanel player1Background, player2Background;
-
     private final JLabel[] tiles;
     private final ButtonGroup groupPlayer1, groupPlayer2;
     private final JRadioButton[] modeSelectorPlayer1, modeSelectorPlayer2;
     private final JSlider gridSizeSlider;
+
+    private final Configuration currentConfiguration;
+    private Configuration lastConfiguration;
+    private int currentMove, lastMove;
+
+    private final Object LOCK = new Object();
 
     private final ActionListener actionListener = new ActionListener() {
         @Override
@@ -53,10 +78,12 @@ public class Gui {
                     break;
                 }
             }
-            System.out.println(GAME_MODES[index]);
-            System.out.println(DIFFICULTIES[(index & 0b1100) >> 2]);
-            System.out.println(DIFFICULTIES[index & 0b11]);
-            System.out.println();
+
+            synchronized (LOCK) {
+                currentConfiguration.gameMode = GAME_MODES[index];
+                currentConfiguration.difficultyPlayer1 = DIFFICULTIES[(index & 0b1100) >> 2];
+                currentConfiguration.difficultyPlayer2 = DIFFICULTIES[index & 0b11];
+            }
         }
     };
 
@@ -64,7 +91,9 @@ public class Gui {
         @Override
         public void stateChanged(ChangeEvent e) {
             if (e.getSource() == gridSizeSlider) {
-                System.out.println(gridSizeSlider.getValue());
+                synchronized (LOCK) {
+                    currentConfiguration.gridSize = (byte) gridSizeSlider.getValue();
+                }
             }
         }
     };
@@ -72,9 +101,9 @@ public class Gui {
     private final MouseListener mouseListener = new MouseAdapter() {
         @Override
         public void mousePressed(MouseEvent e) {
-            for (JLabel tile : tiles) {
-                if (tile == e.getSource()) {
-                    System.out.println(tile.getText());
+            for (int i = 0; i < 64; ++i) {
+                if (tiles[i] == e.getSource()) {
+                    currentMove = i;
                 }
             }
         }
@@ -110,7 +139,7 @@ public class Gui {
 
         slider.setMinimum(2);
         slider.setMaximum(8);
-        slider.setValue(3);
+        slider.setValue(this.currentConfiguration.gridSize);
         slider.setSnapToTicks(true);
         slider.setMinorTickSpacing(1);
         slider.setMajorTickSpacing(3);
@@ -147,16 +176,34 @@ public class Gui {
         panel.setMinimumSize(panel.getSize());
         panel.setMaximumSize(panel.getSize());
         panel.setLocation(0, SETTINGS_HEIGHT * WINDOW_SCALE);
-        panel.setLayout(new GridLayout(3, 3)); // Subject to change
-        for (int i = 0; i < ((GridLayout) panel.getLayout()).getRows() * ((GridLayout) panel.getLayout()).getColumns(); ++i) {
-            panel.add(tiles[i]);
+        this.changeGridSize();
+    }
+
+    private void changeGridSize() {
+        for(Component component : this.gridPanel.getComponents()) {
+            this.gridPanel.remove(component);
         }
+        synchronized (LOCK) {
+            this.gridPanel.setLayout(new GridLayout(this.currentConfiguration.gridSize, this.currentConfiguration.gridSize));
+        }
+        for (int i = 0; i < this.currentConfiguration.gridSize * this.currentConfiguration.gridSize; ++i) {
+            this.gridPanel.add(tiles[i]);
+        }
+        this.gridPanel.revalidate();
+        this.gridPanel.repaint();
+        System.out.println(this.gridPanel.getLayout().toString());
     }
 
     public Gui() {
         this.window = new JFrame();
         this.window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.window.setLayout(new BorderLayout());
+
+        this.currentConfiguration = new Configuration();
+        this.lastConfiguration = new Configuration(this.currentConfiguration);
+
+        this.currentMove = -1;
+        this.lastMove = this.currentMove;
 
         this.tiles = new JLabel[64];
         this.player1Background = new JPanel();
@@ -178,11 +225,46 @@ public class Gui {
 
         this.window.pack();
         this.window.setLocationRelativeTo(null);
-        this.window.setVisible(true);
     }
 
-    public static void main(String[] args) {
-        new Gui();
+    public int getMove() {
+        if (this.currentMove == this.lastMove) {
+            return -1;
+        }
+        this.lastMove = this.currentMove;
+        return this.currentMove;
     }
 
+    public void checkChange(BoardManager boardManager) {
+        synchronized (LOCK) {
+            if (this.lastConfiguration.gridSize != this.currentConfiguration.gridSize) {
+                boardManager.changeSize(this.currentConfiguration.gridSize);
+                this.changeGridSize();
+            }
+        }
+
+        synchronized (LOCK) {
+            if (this.lastConfiguration.gameMode != this.currentConfiguration.gameMode) {
+                boardManager.changeGameMode(this.currentConfiguration.gameMode);
+            }
+        }
+
+        synchronized (LOCK) {
+            if (this.lastConfiguration.difficultyPlayer1 != this.currentConfiguration.difficultyPlayer1) {
+                boardManager.changeDifficulty(this.lastConfiguration.difficultyPlayer1, BoardManager.Player.PLAYER_1);
+            }
+        }
+
+        synchronized (LOCK) {
+            if (this.lastConfiguration.difficultyPlayer2 != this.currentConfiguration.difficultyPlayer2) {
+                boardManager.changeDifficulty(this.lastConfiguration.difficultyPlayer2, BoardManager.Player.PLAYER_2);
+            }
+        }
+        this.lastConfiguration = new Configuration(this.currentConfiguration);
+    }
+
+
+public void setVisible(boolean visible) {
+    this.window.setVisible(visible);
+}
 }
