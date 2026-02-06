@@ -15,17 +15,18 @@ public class GridPanel extends JPanel implements MouseListener {
     /**
      * This constant makes sure that each possible grid size will divide each tile equally.
      */
-    static final int PRIME_FACTOR_PRODUCT = 2 * 2 * 2 * 3 * 5 * 7;
+    final static int PRIME_FACTOR_PRODUCT = 2 * 2 * 2 * 3 * 5 * 7;
+    private final static int[] PIXEL_BY_SIZE = new int[]{512, 256, 128, 64, 32, 32, 16};
 
     private byte size;
     private JLabel[] tiles;
 
-    private GamePlayLoop gamePlayLoop;
+    private final GamePlayLoop gamePlayLoop;
 
     private synchronized void createGrid() {
         super.removeAll();
         super.repaint();
-        Font displayFont = new Font("Tahoma", Font.BOLD, 512 / this.size);
+//        Font displayFont = new Font("Tahoma", Font.BOLD, 512 / this.size);
         this.tiles = new JLabel[this.size * this.size];
         super.setLayout(new GridLayout(this.size, this.size));
         for (int i = 0; i < this.tiles.length; i++) {
@@ -33,7 +34,7 @@ public class GridPanel extends JPanel implements MouseListener {
             this.tiles[i].setBackground(GameWindow.BACKGROUND_COLOR);
             this.tiles[i].setForeground(GameWindow.FOREGROUND_COLOR);
             this.tiles[i].setFocusable(false);
-            this.tiles[i].setFont(displayFont);
+//            this.tiles[i].setFont(displayFont);
             this.tiles[i].setOpaque(true);
             this.tiles[i].addMouseListener(this);
             this.tiles[i].setHorizontalAlignment(JLabel.CENTER);
@@ -60,10 +61,13 @@ public class GridPanel extends JPanel implements MouseListener {
 
     public void makeMove(int index, Player player) {
         // Inverted due to automatic player change after move.
+        // TODO: dynamic size
+        // TODO: slightly larger X
+
         if (player == Player.ONE) {
-            this.tiles[index].setText("X");
+            this.tiles[index].setIcon(new ImageIcon("ico/tic-tac-toe/X-" + PIXEL_BY_SIZE[this.size - 2] + "px.png"));
         } else {
-            this.tiles[index].setText("O");
+            this.tiles[index].setIcon(new ImageIcon("ico/tic-tac-toe/O-" + PIXEL_BY_SIZE[this.size - 2] + "px.png"));
         }
     }
 
@@ -76,7 +80,11 @@ public class GridPanel extends JPanel implements MouseListener {
     public void mousePressed(MouseEvent e) {
         for (int i = 0; i < this.size * this.size; i++) {
             if (e.getSource() == this.tiles[i]) {
-                this.gamePlayLoop.receiveInput(i, Origin.KEYBOARD);
+                try {
+                    this.gamePlayLoop.receiveInput(i, Origin.KEYBOARD);
+                } catch (RuntimeException ex) {
+                    System.err.println(ex.getMessage());
+                }
             }
         }
     }

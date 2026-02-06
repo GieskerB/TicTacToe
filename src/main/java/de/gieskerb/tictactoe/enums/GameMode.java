@@ -1,5 +1,6 @@
 package main.java.de.gieskerb.tictactoe.enums;
 
 public enum GameMode {
-    PvP,PvC,CvP,CvC
+      //0 0, 0 1, 1 0, 1 1
+      PvP, PvC, CvP, CvC
 }

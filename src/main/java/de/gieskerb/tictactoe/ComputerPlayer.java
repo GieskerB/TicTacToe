@@ -6,95 +6,106 @@ import java.util.ArrayList;
 
 public class ComputerPlayer {
 
-    public static ArrayList<Byte> getEmptyTiles(Board board) {
-        ArrayList<Byte> emptyTiles = new ArrayList<>(board.getSize());
-        for (byte i = 0; i < board.getSizeSquared(); i++ ) {
-            if(board.isEmptyTile(i)) {
-                emptyTiles.add(i);
-            }
-        }
-        return emptyTiles;
-    }
+//    private static Buffer buffer = new Buffer(16);
 
-    static int easyDifficulty(Board board) {
-        ArrayList<Byte> emptyTiles = getEmptyTiles(board);
+    public static int easyDifficulty(Board board) {
+        ArrayList<Byte> emptyTiles = board.getEmptyTiles();
         return emptyTiles.get((int) (Math.random() * emptyTiles.size()));
     }
 
-    static int mediumDifficulty(Board board) {
+    public static int mediumDifficulty(Board board) {
         return 1;
     }
 
-    static private int minimax(Board board, int depth) {
+    static private byte minimax(Board board, byte depth, int alpha, int beta) {
         if (board.checkWinPlayerOne()) {
-            return -depth;
+            return (byte) -depth;
         } else if (board.checkWinPlayerTwo()) {
             return depth;
-        } else if (board.checkTie()) {
+        } else if (board.checkTie() ||  depth <= 0) {
             return 0;
         }
 
-        ArrayList<Byte> emptyTiles = getEmptyTiles(board);
-        int bestScore;
-        if(board.getCurrentPlayer()== Player.ONE) {
-            bestScore = Integer.MIN_VALUE;
-            for(byte move: emptyTiles) {
-                board.makeMove(move);
+        final long LAST_VALID_MOVE = 1L << board.getSizeSquared();
+        long emptyTilesBitmap = board.getEmptyTilesFast(), move = 1;
+        byte bestScore;
+        if (board.getCurrentPlayer() == Player.ONE) {
+            bestScore = Byte.MIN_VALUE;
+            do {
+                if ((move & emptyTilesBitmap) != 0) {
+                    board.makeMoveFast(move);
+                    final byte score = minimax(board, (byte) (depth - 1), alpha, beta);
+                    board.undoMoveFast(move);
 
-                int score = minimax(board, depth - 1);
 
-                if(score > bestScore) {
-                    bestScore = score;
+                    if (score > bestScore) bestScore = score;
+                    if (alpha > score) alpha = score;
+                    if (beta <= alpha) break;
                 }
-
-                board.undoMove(move);
-            }
+                move <<= 1;
+            } while (move != LAST_VALID_MOVE);
         } else {
-            bestScore = Integer.MAX_VALUE;
-            for(byte move: emptyTiles) {
-                board.makeMove(move);
+            bestScore = Byte.MAX_VALUE;
+            do {
+                if ((move & emptyTilesBitmap) != 0) {
+                    board.makeMoveFast(move);
+                    final byte score = minimax(board, (byte) (depth - 1), alpha, beta);
+                    board.undoMoveFast(move);
 
-                int score = minimax(board, depth - 1);
 
-                if(score < bestScore) {
-                    bestScore = score;
+                    if (score < bestScore) bestScore = score;
+                    if (beta < score) beta = score;
+                    if (beta <= alpha) break;
                 }
-
-                board.undoMove(move);
-            }
+                move <<= 1;
+            } while (move != LAST_VALID_MOVE);
         }
         return bestScore;
     }
 
-    static int hardDifficulty(Board board) {
-        System.out.println("Started thinking");
-        ArrayList<Byte> emptyTiles = getEmptyTiles(board);
+    public static int hardDifficulty(Board board) {
+        ArrayList<Byte> allMoves = ComputerPlayer.hardDifficultyAllMoves(board);
+        return allMoves.get((int) (Math.random() * allMoves.size()));
+    }
+
+    private static Buffer moveBuffer = new Buffer(12);
+
+    public static ArrayList<Byte> hardDifficultyAllMoves(Board board) {
+        ArrayList<Byte> emptyTiles = board.getEmptyTiles();
         ArrayList<Byte> bestMoves = new ArrayList<>();
-        int bestScore = Integer.MIN_VALUE;
-        for(byte move: emptyTiles) {
+        byte bestScore = Byte.MIN_VALUE;
+        for (byte move : emptyTiles) {
             board.makeMove(move);
 
-            int score = minimax(board, board.getSizeSquared());
-            if (board.getPreviousPlayer() == Player.TWO) {
-              score *= -1;
+            byte score;
+            boolean containedInBuffer = false;
+            if(moveBuffer.contains(board.getBitMapPlayerOne(), board.getBitMapPlayerTwo(), board.getSize())) {
+                score = moveBuffer.getValue(board.getBitMapPlayerOne(), board.getBitMapPlayerTwo(), board.getSize());
+                containedInBuffer = true;
+            } else {
+                score = minimax(board, (byte) 5, Integer.MIN_VALUE, Integer.MAX_VALUE);
             }
 
-            System.err.println("Score: " + score + " ");
+            if (board.getPreviousPlayer() == Player.TWO) {
+                score *= -1;
+            }
+
             if (score > bestScore) {
                 bestScore = score;
                 bestMoves.clear();
                 bestMoves.add(move);
-            } else if(score == bestScore) {
+            } else if (score == bestScore) {
                 bestMoves.add(move);
+            }
+
+            if(!containedInBuffer) {
+                moveBuffer.setValue(board.getBitMapPlayerOne(), board.getBitMapPlayerTwo(), board.getSize(), (byte) -bestScore);
             }
 
             board.undoMove(move);
         }
 
-        for(byte move: bestMoves) {
-            System.out.print(move + " ");
-        } System.out.println();
-        return bestMoves.get((int) (Math.random() * bestMoves.size()));
+        return bestMoves;
     }
 
 }

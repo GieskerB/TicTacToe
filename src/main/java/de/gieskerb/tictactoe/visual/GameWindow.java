@@ -1,12 +1,9 @@
 package main.java.de.gieskerb.tictactoe.visual;
 
-import main.java.de.gieskerb.tictactoe.Board;
 import main.java.de.gieskerb.tictactoe.GamePlayLoop;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class GameWindow extends JFrame {
 
@@ -16,14 +13,15 @@ public class GameWindow extends JFrame {
 
     public GameWindow() {
         super();
-        super.setTitle("Tic-Tac-Toe");
+        super.setTitle(">>> The ultimate Tic-Tac-Toe <<<");
+        super.setIconImage(new ImageIcon("ico/logo/icons8-tic-tac-toe-100.png").getImage());
         super.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         super.setLayout(new BorderLayout());
 
         GamePlayLoop gamePlayLoop = new GamePlayLoop();
         GridPanel gridPanel = new GridPanel(gamePlayLoop);
         gamePlayLoop.attachGridPanel(gridPanel);
-        InfoPanel infoPanel = new InfoPanel(gridPanel,gamePlayLoop);
+        ControlPanel infoPanel = new ControlPanel(gamePlayLoop);
 
         super.add(infoPanel, BorderLayout.NORTH);
         super.add(gridPanel, BorderLayout.SOUTH);
