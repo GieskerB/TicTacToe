@@ -6,31 +6,47 @@ import java.util.ArrayList;
 
 public class Board {
     /**
-     * Simple way to communicate which state a tile has, because Board uses a bitmap.
-     */
-    public enum Tile {
-        EMPTY, PLAYER1, PLAYER2
-    }
-
-    /**
      * Size constants for easy bounds checking
      */
     private final byte SIZE, SIZE_SQUARED;
-
-    /**
-     * Bitmap per player: using a long, to still be able to represent an 8 by 8 grid.
-     */
-    private long bitMapPlayerOne, bitMapPlayerTwo;
-
     /**
      * List of all bitmaps required to check if a win occurred in a players bitmap.
      */
     private final ArrayList<Long> winningBitMaps;
-
+    /**
+     * Bitmap per player: using a long, to still be able to represent an 8 by 8 grid.
+     */
+    private long bitMapPlayerOne, bitMapPlayerTwo;
     /**
      * Remembers current player.
      */
     private Player currentPlayer;
+
+    public Board(Board board) {
+        this.SIZE = board.SIZE;
+        this.SIZE_SQUARED = board.SIZE_SQUARED;
+        this.bitMapPlayerOne = board.bitMapPlayerOne;
+        this.bitMapPlayerTwo = board.bitMapPlayerTwo;
+        this.winningBitMaps = board.winningBitMaps;
+        this.currentPlayer = board.currentPlayer;
+    }
+
+    /**
+     * Constructs an empty TicTacToe Board ready to be played on.
+     *
+     * @param size determines the number of row and columns. Must be in range [2, 8].
+     */
+    public Board(int size) {
+        if (size < 2 || size > 8) {
+            throw new IllegalArgumentException("Board size must be in range [2, 8]");
+        }
+        this.SIZE = (byte) size;
+        this.SIZE_SQUARED = (byte) (this.SIZE * this.SIZE);
+        this.bitMapPlayerOne = 0;
+        this.bitMapPlayerTwo = 0;
+        this.winningBitMaps = Board.createWinningBitMaps(this.SIZE);
+        this.currentPlayer = Player.ONE;
+    }
 
     /**
      * Creates all bitmaps to check for horizontal, vertical ior diagonal wins.
@@ -88,32 +104,6 @@ public class Board {
         }
     }
 
-    public Board(Board board) {
-        this.SIZE = board.SIZE;
-        this.SIZE_SQUARED = board.SIZE_SQUARED;
-        this.bitMapPlayerOne = board.bitMapPlayerOne;
-        this.bitMapPlayerTwo = board.bitMapPlayerTwo;
-        this.winningBitMaps = board.winningBitMaps;
-        this.currentPlayer = board.currentPlayer;
-    }
-
-    /**
-     * Constructs an empty TicTacToe Board ready to be played on.
-     *
-     * @param size determines the number of row and columns. Must be in range [2, 8].
-     */
-    public Board(int size) {
-        if (size < 2 || size > 8) {
-            throw new IllegalArgumentException("Board size must be in range [2, 8]");
-        }
-        this.SIZE = (byte) size;
-        this.SIZE_SQUARED = (byte) (this.SIZE * this.SIZE);
-        this.bitMapPlayerOne = 0;
-        this.bitMapPlayerTwo = 0;
-        this.winningBitMaps = Board.createWinningBitMaps(this.SIZE);
-        this.currentPlayer = Player.ONE;
-    }
-
     public long getBitMapPlayerOne() {
         return this.bitMapPlayerOne;
     }
@@ -147,7 +137,7 @@ public class Board {
         this.checkBounds(index);
         // Convert index to bitmap
         index = 1L << index;
-        ;
+
         // Return corresponding value
         if ((this.bitMapPlayerOne & index) != 0) {
             return Tile.PLAYER1;
@@ -157,49 +147,48 @@ public class Board {
         return Tile.EMPTY;
     }
 
+    public void makeMove(int index) {
+        if(index >= 64 || index < 0) {
+            throw new IllegalArgumentException("Board index must be in range [0, 64]");
+        }
+        this.makeMove((byte)index);
+    }
+
+    public void undoMove(int index) {
+        if(index >= 64 || index < 0) {
+            throw new IllegalArgumentException("Board index must be in range [0, 64]");
+        }
+        this.undoMove((byte)index);
+    }
+
     /**
      * Playing a move by index. Automatically switches players after each move.
      *
      * @param index refers to a single tile counted form top left to bottom right, starting with 0.
      */
-    public void makeMove(long index) {
+    public void makeMove(byte index) {
         this.checkBounds(index);
-        {
-            // Check occupancy
-            byte tempIndex = (byte) index;
-            index = 1L << index;
 
-            if (((this.bitMapPlayerOne | this.bitMapPlayerTwo) & index) != 0) {
-                throw new RuntimeException("The tile " + tempIndex + " is allready occupied!");
-            }
+        // Check occupancy
+        final long bitmap = 1L << index;
+        if (((this.bitMapPlayerOne | this.bitMapPlayerTwo) & bitmap) != 0) {
+            throw new RuntimeException("The tile " + index + " is allready occupied!");
         }
+
         // making the move by storing it in the right bitmap.
-        if (this.currentPlayer == Player.ONE) {
-            this.bitMapPlayerOne |= index;
-        } else {
-            this.bitMapPlayerTwo |= index;
-        }
-        this.currentPlayer = this.currentPlayer.otherPlayer();
+        this.makeMoveFast(bitmap);
     }
 
-    public void undoMove(long index) {
+    public void undoMove(byte index) {
         this.checkBounds(index);
-        {
-            // Check occupancy
-            byte tempIndex = (byte) index;
-            index = 1L << index;
 
-            if (((this.bitMapPlayerOne | this.bitMapPlayerTwo) & index) == 0) {
-                throw new RuntimeException("No Player has made a move at this index: " + tempIndex + "!");
-            }
+        // Check occupancy
+        final long bitmap = 1L << index;
+        if (((this.bitMapPlayerOne | this.bitMapPlayerTwo) & bitmap) == 0) {
+            throw new RuntimeException("No Player has made a move at this index: " + index + "!");
         }
 
-        this.currentPlayer = this.currentPlayer.otherPlayer();
-        if (this.currentPlayer == Player.ONE) {
-            this.bitMapPlayerOne ^= index;
-        } else {
-            this.bitMapPlayerTwo ^= index;
-        }
+        this.undoMoveFast(bitmap);
     }
 
     public ArrayList<Byte> getEmptyTiles() {
@@ -273,6 +262,17 @@ public class Board {
 
     public boolean checkGameOver() {
         return this.checkWinPlayerOne() || this.checkWinPlayerTwo() || this.checkTie();
+    }
+
+    public int evaluateBoard(Board board) {
+
+    }
+
+    /**
+     * Simple way to communicate which state a tile has, because Board uses a bitmap.
+     */
+    public enum Tile {
+        EMPTY, PLAYER1, PLAYER2
     }
 
 }

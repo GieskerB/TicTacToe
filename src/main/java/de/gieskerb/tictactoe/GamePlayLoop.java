@@ -38,14 +38,14 @@ public class GamePlayLoop {
                     }
                     case PvC -> {
                         if (this.board.getCurrentPlayer() == Player.TWO) {
-                            int index = computerMove(this.difficultyTwo);
+                            byte index = computerMove(this.difficultyTwo);
                             this.receiveInput(index, Origin.COMPUTER);
                             this.gridPanel.makeMove(index, Player.TWO);
                         }
                     }
                     case CvP -> {
                         if (this.board.getCurrentPlayer() == Player.ONE) {
-                            int index = computerMove(this.difficultyOne);
+                            byte index = computerMove(this.difficultyOne);
                             this.receiveInput(index, Origin.COMPUTER);
                             this.gridPanel.makeMove(index, Player.ONE);
                         }
@@ -53,11 +53,11 @@ public class GamePlayLoop {
                     case CvC -> {
 
                         if (this.board.getCurrentPlayer() == Player.ONE) {
-                            int index = computerMove(this.difficultyOne);
+                            byte index = computerMove(this.difficultyOne);
                             this.board.makeMove(index);
                             this.gridPanel.makeMove(index, Player.ONE);
                         } else {
-                            int index = computerMove(this.difficultyTwo);
+                            byte index = computerMove(this.difficultyTwo);
                             this.receiveInput(index, Origin.COMPUTER);
                             this.gridPanel.makeMove(index, Player.TWO);
                         }
@@ -89,7 +89,7 @@ public class GamePlayLoop {
         this.restartGame();
     }
 
-    private int computerMove(Difficulty difficulty) {
+    private byte computerMove(Difficulty difficulty) {
         System.err.println(difficulty);
         switch (difficulty) {
             case EASY -> {
@@ -146,7 +146,7 @@ public class GamePlayLoop {
         this.gridPanel.restart();
     }
 
-    public void receiveInput(int index, Origin origin) {
+    public void receiveInput(byte index, Origin origin) {
         if (this.board.checkGameOver()) return;
 
         switch (this.gameMode) {

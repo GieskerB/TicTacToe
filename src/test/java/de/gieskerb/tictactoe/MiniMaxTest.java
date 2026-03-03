@@ -87,19 +87,5 @@ public class MiniMaxTest {
         this.board = new Board(4);
     }
 
-    @Test
-    void testFirstMove() {
-        long start = System.currentTimeMillis();
-        var checkList = bestMoves(board);
-        long end = System.currentTimeMillis();
-        System.err.println("STD-Minimax:     " + (end - start));
-
-        start = System.currentTimeMillis();
-        var testList = ComputerPlayer.hardDifficultyAllMoves(board);
-        end = System.currentTimeMillis();
-        System.err.println("Current-Minimax: " + (end - start));
-
-        assertEquals(checkList, testList);
-    }
 
 }

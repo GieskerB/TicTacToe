@@ -78,7 +78,7 @@ public class GridPanel extends JPanel implements MouseListener {
 
     @Override
     public void mousePressed(MouseEvent e) {
-        for (int i = 0; i < this.size * this.size; i++) {
+        for (byte i = 0; i < this.size * this.size; i++) {
             if (e.getSource() == this.tiles[i]) {
                 try {
                     this.gamePlayLoop.receiveInput(i, Origin.KEYBOARD);
