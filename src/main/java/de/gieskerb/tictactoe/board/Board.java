@@ -88,7 +88,7 @@ public class Board {
     }
 
     public boolean checkTie() {
-        return ((this.player1.bitMap | this.player2.bitMap) & this.fullBoardBitMap) == this.fullBoardBitMap;
+        return ((this.player1.bitMap | this.player2.bitMap) & this.fullBoardBitMap) == this.fullBoardBitMap && this.fullBoardBitMap != 0;
     }
 
     public boolean checkGameOver() {

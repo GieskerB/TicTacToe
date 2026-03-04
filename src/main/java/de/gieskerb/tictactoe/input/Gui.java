@@ -2,6 +2,7 @@ package main.java.de.gieskerb.tictactoe.input;
 
 import main.java.de.gieskerb.tictactoe.board.BoardManager;
 import main.java.de.gieskerb.tictactoe.player.Computer;
+import main.java.de.gieskerb.tictactoe.player.Human;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -63,7 +64,18 @@ public class Gui {
     private final ActionListener actionListener = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
-            // TODO add return if action not from Button
+            boolean inModeSelector = false;
+
+            for (int i = 0; i < 4; ++i) {
+                if (e.getSource() == modeSelectorPlayer1[i] || e.getSource() == modeSelectorPlayer2[i]) {
+                    inModeSelector = true;
+                    break;
+                }
+            }
+            if (!inModeSelector) {
+                return;
+            }
+
             int index = 0;
             for (int i = 0; i < 4; ++i) {
                 if (groupPlayer1.getSelection() == modeSelectorPlayer1[i].getModel()) {
@@ -84,6 +96,7 @@ public class Gui {
                 currentConfiguration.difficultyPlayer1 = DIFFICULTIES[(index & 0b1100) >> 2];
                 currentConfiguration.difficultyPlayer2 = DIFFICULTIES[index & 0b11];
             }
+            updateChanges();
         }
     };
 
@@ -95,6 +108,10 @@ public class Gui {
                     currentConfiguration.gridSize = (byte) gridSizeSlider.getValue();
                 }
             }
+            synchronized(BoardManager.GUI_LOCK) {
+                BoardManager.GUI_LOCK.notify();
+            }
+            updateChanges();
         }
     };
 
@@ -104,8 +121,13 @@ public class Gui {
             for (int i = 0; i < 64; ++i) {
                 if (tiles[i] == e.getSource()) {
                     currentMove = i;
+                    break;
                 }
             }
+            synchronized(BoardManager.GUI_LOCK) {
+                BoardManager.GUI_LOCK.notify();
+            }
+            updateChanges();
         }
     };
 
@@ -191,7 +213,6 @@ public class Gui {
         }
         this.gridPanel.revalidate();
         this.gridPanel.repaint();
-        System.out.println(this.gridPanel.getLayout().toString());
     }
 
     public Gui() {
@@ -235,36 +256,36 @@ public class Gui {
         return this.currentMove;
     }
 
-    public void checkChange(BoardManager boardManager) {
+    public void updateChanges() {
         synchronized (LOCK) {
             if (this.lastConfiguration.gridSize != this.currentConfiguration.gridSize) {
-                boardManager.changeSize(this.currentConfiguration.gridSize);
+                BoardManager.getInstance().changeSize(this.currentConfiguration.gridSize);
                 this.changeGridSize();
             }
         }
 
         synchronized (LOCK) {
             if (this.lastConfiguration.gameMode != this.currentConfiguration.gameMode) {
-                boardManager.changeGameMode(this.currentConfiguration.gameMode);
+                BoardManager.getInstance().changeGameMode(this.currentConfiguration.gameMode);
             }
         }
 
         synchronized (LOCK) {
             if (this.lastConfiguration.difficultyPlayer1 != this.currentConfiguration.difficultyPlayer1) {
-                boardManager.changeDifficulty(this.lastConfiguration.difficultyPlayer1, BoardManager.Player.PLAYER_1);
+                BoardManager.getInstance().changeDifficulty(this.currentConfiguration.difficultyPlayer1, BoardManager.Player.PLAYER_1);
             }
         }
 
         synchronized (LOCK) {
             if (this.lastConfiguration.difficultyPlayer2 != this.currentConfiguration.difficultyPlayer2) {
-                boardManager.changeDifficulty(this.lastConfiguration.difficultyPlayer2, BoardManager.Player.PLAYER_2);
+                BoardManager.getInstance().changeDifficulty(this.currentConfiguration.difficultyPlayer2, BoardManager.Player.PLAYER_2);
             }
         }
         this.lastConfiguration = new Configuration(this.currentConfiguration);
     }
 
 
-public void setVisible(boolean visible) {
-    this.window.setVisible(visible);
-}
+    public void setVisible(boolean visible) {
+        this.window.setVisible(visible);
+    }
 }
