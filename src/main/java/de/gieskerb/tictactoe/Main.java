@@ -6,9 +6,9 @@ import javax.swing.*;
 
 public class Main {
     public static void main (String[] args)  {
-        BoardManager boardManager = new BoardManager();
+        BoardManager boardManager = BoardManager.getInstance();
         BoardManager.Player winningPlayer = boardManager.playFullRound();
-        System.out.println(winningPlayer);
+        // Print WINNER -> Move to loop for infinite play
     }
 
 //        try {

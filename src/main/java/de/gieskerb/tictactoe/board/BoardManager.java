@@ -5,6 +5,8 @@ import main.java.de.gieskerb.tictactoe.player.Human;
 
 public class BoardManager {
 
+    public static final Object GUI_LOCK = new Object();
+
     public enum Player {
         PLAYER_1, PLAYER_2
     }
@@ -45,10 +47,19 @@ public class BoardManager {
         if (this.isComputerMove()) {
             move = Computer.makeMove(this.board,playerOnePlaying ? this.difficultyAi1 : this.difficultyAi2,playerOnePlaying);
         } else {
-            move = Human.makeMove(this, this.inputDevice, playerOnePlaying);
+            move = Human.makeMove(this.inputDevice, playerOnePlaying);
         }
 
+        System.out.println(move);
+
         if (move == -1) {
+            try {
+                synchronized(GUI_LOCK) {
+                    GUI_LOCK.wait(1000);
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             return null;
         }
 
@@ -68,13 +79,22 @@ public class BoardManager {
         return null;
     }
 
-    public BoardManager() {
+    private static BoardManager instance;
+
+    public static BoardManager getInstance() {
+        if (instance == null) {
+            instance = new BoardManager();
+        }
+        return instance;
+    }
+
+    private BoardManager() {
         this.board = new Board(3);
         this.currentPlayer = Player.PLAYER_1;
         this.gameMode = GameMode.PVP;
         this.difficultyAi1 = Computer.Difficulty.EASY;
         this.difficultyAi2 = Computer.Difficulty.EASY;
-        this.inputDevice = Human.InputDevice.GUI;
+        this.inputDevice = Human.InputDevice.CONSOLE;
     }
 
     public Player playFullRound() {

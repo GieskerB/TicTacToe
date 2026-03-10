@@ -89,6 +89,9 @@ public class Computer {
     }
 
     public static int makeMove(Board board, Difficulty difficulty, boolean isPlayerOne) {
+        if (difficulty == null) {
+            return -1;
+        }
         switch (difficulty) {
             case EASY -> {
                 return makeEasyMove(board);
