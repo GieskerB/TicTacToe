@@ -29,6 +29,7 @@ public class ComputerPlayer {
         return bestMoves.get((int) (Math.random() * bestMoves.size()));
     }
 
+    
     private static int miniMax(Board board, byte depth, byte alpha, byte beta, boolean isMaximizingPlayer) {
         // Basisfall: Wenn die maximale Tiefe erreicht ist oder das Spiel zu Ende ist, gib die Bewertung des aktuellen Boards zurück
         if (depth == 0 || board.checkGameOver()) {

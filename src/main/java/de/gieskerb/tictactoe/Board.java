@@ -264,10 +264,6 @@ public class Board {
         return this.checkWinPlayerOne() || this.checkWinPlayerTwo() || this.checkTie();
     }
 
-    public int evaluateBoard(Board board) {
-
-    }
-
     /**
      * Simple way to communicate which state a tile has, because Board uses a bitmap.
      */
